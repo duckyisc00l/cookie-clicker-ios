@@ -80,6 +80,30 @@ enum CordovaBridgeScript {
     }, true);
   });
 
+  // --- edge-to-edge on notched iPhones ---
+  // Backgrounds fill the whole screen; the top bar, screens, popups and tabs are kept clear of the
+  // notch and home bar. Swift sends the safe-area sizes; they're converted to the game's 320px-wide units.
+  var safeTop = 0, safeBottom = 0;
+  function applySafeArea(){
+    var w = document.documentElement.clientWidth || window.innerWidth || 320;
+    var k = 320 / w, s = document.documentElement.style;
+    s.setProperty('--cc-sat', (safeTop * k) + 'px');
+    s.setProperty('--cc-sab', (safeBottom * k) + 'px');
+  }
+  window.__ccSafeInsets = function(top, bottom){ safeTop = top || 0; safeBottom = bottom || 0; applySafeArea(); };
+  window.addEventListener('resize', applySafeArea);
+  var css = document.createElement('style');
+  css.textContent = [
+    '#topStuff{top:var(--cc-sat,0px);bottom:var(--cc-sab,0px);}',
+    '#screens{top:var(--cc-sat,0px);bottom:calc(40px + var(--cc-sab,0px));}',
+    '#tabs{box-sizing:content-box;height:40px;padding-bottom:var(--cc-sab,0px);}',
+    '#tabs.bottomShelf:before{bottom:calc(var(--cc-sab,0px) - 3px);}',
+    '#tabs.bottomShelf:after{content:"";pointer-events:none;position:absolute;left:0;right:0;bottom:0;' +
+      'height:var(--cc-sab,0px);background:url(img/bottomShelf.png) center bottom -3px / 320px 73px no-repeat;transform:scaleY(-1);z-index:-1;}',
+    '.popup{margin-top:calc(60px + var(--cc-sat,0px));margin-bottom:calc(44px + var(--cc-sab,0px));}'
+  ].join('\n');
+  (document.head || document.documentElement).appendChild(css);
+
   // what Cordova does once its plugins are ready
   document.addEventListener('DOMContentLoaded', function(){
     setTimeout(function(){ document.dispatchEvent(new Event('deviceready')); }, 0);

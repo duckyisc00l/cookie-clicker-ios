@@ -38,11 +38,12 @@ final class GameViewController: UIViewController {
         root.backgroundColor = .black
         root.addSubview(webView)
         webView.translatesAutoresizingMaskIntoConstraints = false
+        // Fill the whole screen, edge to edge; the game keeps its UI clear of the notch and home bar.
         NSLayoutConstraint.activate([
-            webView.leadingAnchor.constraint(equalTo: root.safeAreaLayoutGuide.leadingAnchor),
-            webView.trailingAnchor.constraint(equalTo: root.safeAreaLayoutGuide.trailingAnchor),
-            webView.topAnchor.constraint(equalTo: root.safeAreaLayoutGuide.topAnchor),
-            webView.bottomAnchor.constraint(equalTo: root.safeAreaLayoutGuide.bottomAnchor),
+            webView.leadingAnchor.constraint(equalTo: root.leadingAnchor),
+            webView.trailingAnchor.constraint(equalTo: root.trailingAnchor),
+            webView.topAnchor.constraint(equalTo: root.topAnchor),
+            webView.bottomAnchor.constraint(equalTo: root.bottomAnchor),
         ])
         view = root
     }
@@ -50,6 +51,28 @@ final class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.load(URLRequest(url: LocalSchemeHandler.startURL))
+    }
+
+    override func viewSafeAreaInsetsDidChange() {
+        super.viewSafeAreaInsetsDidChange()
+        sendSafeArea()
+    }
+
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        sendSafeArea()
+    }
+
+    private var lastSentInsets: UIEdgeInsets?
+
+    /// Tells the game how much room the notch and home bar take up.
+    fileprivate func sendSafeArea(force: Bool = false) {
+        let insets = view.safeAreaInsets
+        guard force || insets != lastSentInsets else { return }
+        lastSentInsets = insets
+        webView?.evaluateJavaScript(
+            "window.__ccSafeInsets && window.__ccSafeInsets(\(insets.top), \(insets.bottom));",
+            completionHandler: nil)
     }
 }
 
@@ -63,6 +86,10 @@ extension GameViewController: WKNavigationDelegate {
             UIApplication.shared.open(url)
             decisionHandler(.cancel)
         }
+    }
+
+    func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+        sendSafeArea(force: true)
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {
