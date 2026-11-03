@@ -1,0 +1,31 @@
+name: CookieClicker
+options:
+  bundleIdPrefix: com.duckyisc00l
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  CookieClicker:
+    type: application
+    platform: iOS
+    sources:
+      - path: CookieClicker
+        excludes:
+          - "www/**"
+          - "Info.plist"
+      - path: CookieClicker/www
+        type: folder
+        buildPhase: resources
+    scheme: {}
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.duckyisc00l.cookieclicker
+        PRODUCT_NAME: CookieClicker
+        INFOPLIST_FILE: CookieClicker/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "10058"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""
