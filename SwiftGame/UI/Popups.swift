@@ -9,10 +9,14 @@ struct PopupFrame<Content: View>: View {
     let close: () -> Void
     @ViewBuilder var content: () -> Content
     var body: some View {
-        let inner = VStack(spacing: 4 * u) { content() }
+        let inner = VStack(spacing: 2 * u) { content() }
             .foregroundColor(Color(white: 0.8))
-            .padding(.horizontal, 16 * u).padding(.top, 8 * u).padding(.bottom, 4 * u)
-            .frame(width: 300 * u)
+            .padding(.horizontal, 11 * u).padding(.vertical, 8 * u)
+            .frame(width: 284 * u)
+            .frame(minHeight: 252 * u, alignment: .top)
+            .background(RoundedRectangle(cornerRadius: 4 * u).fill(Color.black.opacity(0.25)))
+            .background(BumpyBorder(u: u))
+            .padding(.top, 8 * u).padding(.horizontal, 8 * u)
         ZStack {
             Color.black.opacity(0.001).ignoresSafeArea().onTapGesture(perform: close)
             VStack(spacing: 0) {
@@ -259,21 +263,38 @@ struct BuildingInfo: View {
     let b: Building
     let u: CGFloat
     var body: some View {
-        let total = game.cookiesPs
         let each = b.storedCps
         let all = each * Double(b.amount)
         PopupTitle(text: "Building info", u: u)
-        NameBox(icon: b.def.icon, building: b, name: "\(b.amount) \(cap(game.buildingName(b, b.amount)))", u: u)
-        RichText(html: game.buildingDesc(b), size: 12 * u, align: .center)
+        NameBox(icon: b.def.icon, building: b, name: cap(game.buildingName(b, 1)), sub: "Owned: \(B(Double(b.amount)))", u: u)
         Line(u: u)
-        VStack(alignment: .leading, spacing: 3 * u) {
-            RichText(html: "&bull; Each \(b.def.single) produces <b>\(B(each, 1))</b> cookie\(B(each, 1) == "1" ? "" : "s") per second", size: 11 * u)
-            RichText(html: "&bull; \(b.amount) \(b.amount == 1 ? b.def.single : b.def.plural) producing <b>\(B(all, 1))</b> cookie\(B(all, 1) == "1" ? "" : "s") per second (<b>\(B(total > 0 ? all / total * 100 : 0, 1))%</b> of total CpS)", size: 11 * u)
-            RichText(html: "&bull; <b>\(B(b.cookiesMade))</b> cookie\(B(b.cookiesMade) == "1" ? "" : "s") \(b.def.actionName) so far", size: 11 * u)
-            RichText(html: "&bull; Next one costs <b>\(B(game.cost(b)))</b>", size: 11 * u)
+        VStack(alignment: .leading, spacing: 0) {
+            bullet("each \(b.def.single) produces <b>\(B(each, 1))</b> cookie\(B(each, 1) == "1" ? "" : "s") per second")
+            bullet("<b>\(B(Double(b.amount))) \(b.amount == 1 ? b.def.single : b.def.plural)</b> producing <b>\(B(all, 1))</b> cookie\(B(all, 1) == "1" ? "" : "s") per second")
+            bullet("<b>\(B(b.cookiesMade))</b> cookie\(B(b.cookiesMade) == "1" ? "" : "s") \(b.def.actionName) so far")
         }
         .frame(maxWidth: .infinity, alignment: .leading)
+        Line(u: u)
+        Quote(text: game.buildingDesc(b), u: u)
         if Lumps.canLumps(game) && game.lumpT > 0 { LevelBox(b: b, u: u) }
+    }
+    func bullet(_ html: String) -> some View {
+        RichText(html: "&bull; " + html, size: 11 * u, color: Color(white: 0.8))
+            .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
+            .frame(minHeight: 19 * u, alignment: .leading)
+    }
+}
+
+/// the original's <q>: Georgia italic, right-aligned, faded, with big curly quotes
+struct Quote: View {
+    let text: String
+    let u: CGFloat
+    var body: some View {
+        (Text("\u{201C}").font(.georgia(16 * u, bold: true)) + Text(RichText.plain(text)).font(.georgia(11 * u, italic: true)) + Text("\u{201D}").font(.georgia(16 * u, bold: true)))
+            .foregroundColor(Color.white.opacity(0.65))
+            .multilineTextAlignment(.trailing)
+            .frame(maxWidth: .infinity, alignment: .trailing)
+            .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
     }
 }
 
@@ -301,41 +322,60 @@ struct LevelBox: View {
     }
 }
 
+/// grey label pill (the original's ".tag")
+struct TagPill: View {
+    let text: String
+    let u: CGFloat
+    var color: Color = Color(white: 0.8)
+    var body: some View {
+        Text(text).font(.body(10 * u, bold: true)).foregroundColor(Color(white: 0.1))
+            .padding(.horizontal, 3 * u).frame(height: 14 * u)
+            .background(RoundedRectangle(cornerRadius: 2 * u).fill(color))
+    }
+}
+
 struct UpgradeInfo: View {
     @EnvironmentObject var game: Game
     @EnvironmentObject var ui: UIState
     let up: Upgrade
     let u: CGFloat
-    var tag: (String, Color) {
+    var tag: String {
         switch up.pool {
-        case "prestige": return ("Heavenly", Color(hex: "efa438"))
-        case "science": return ("Tech", Color(hex: "36a4ff"))
-        case "cookie": return ("Cookie", Color(white: 0.4))
-        case "toggle": return ("Switch", Color(white: 0.4))
-        default: return ("Upgrade", Color(white: 0.4))
+        case "prestige": return "Heavenly"
+        case "science": return "Research"
+        case "cookie": return "Cookie"
+        case "toggle": return "Switch"
+        default: return "Upgrade"
         }
     }
     var body: some View {
+        let cost = game.upgradeCost(up)
         PopupTitle(text: "Upgrade info", u: u)
-        NameBox(icon: up.def.icon, name: up.name, tag: tag, u: u)
-        RichText(html: game.upgradeDesc(up), size: 12 * u, align: .center)
-        if !up.def.q.isEmpty { RichText(html: "<q>" + up.def.q + "</q>", size: 11 * u, align: .center) }
+        NameBox(icon: up.def.icon, name: up.name, u: u)
         Line(u: u)
-        if up.owned > 0 {
-            Text(up.pool == "toggle" ? "Active." : "Purchased.").font(.system(size: 12 * u, weight: .bold)).foregroundColor(.costGreen)
-        } else if up.pool == "prestige" {
-            let can = game.heavenlyChips >= game.upgradeCost(up)
-            RichText(html: "Costs <b>\(B(game.upgradeCost(up)))</b> heavenly chip\(game.upgradeCost(up) == 1 ? "" : "s").", size: 12 * u, align: .center)
-            if game.onAscend == 1 {
-                let parentsOK = (game.data.heavenlyParents[up.id] ?? []).allSatisfy { game.upgradesBID[$0]?.owned ?? 0 > 0 }
-                GameButton(text: "Buy", u: u, size: 15, enabled: can && parentsOK) { if game.buyUpgrade(up) { ui.popup = nil } }
+        HStack(spacing: 2 * u) {
+            TagPill(text: tag, u: u, color: up.pool == "prestige" ? Color(hex: "efa438") : Color(white: 0.8))
+            TagPill(text: up.owned > 0 ? "Purchased" : (up.unlocked > 0 || up.pool == "prestige" ? "Not yet purchased" : "Locked"), u: u)
+        }
+        if up.owned == 0 {
+            HStack(spacing: 2 * u) {
+                Text("Cost:").font(.body(10 * u, bold: true))
+                if up.pool == "prestige" {
+                    Text("\(B(cost)) heavenly chip\(cost == 1 ? "" : "s")").font(.body(11 * u, bold: true)).foregroundColor(Color(hex: "efa438"))
+                } else {
+                    CostText(cost: cost, can: game.cookies >= cost, u: u)
+                }
             }
-        } else if up.unlocked > 0 && !["science"].contains(up.pool) {
-            let cost = game.upgradeCost(up)
-            CostText(cost: cost, can: game.cookies >= cost, u: u).scaleEffect(1.3)
-            GameButton(text: "Buy", u: u, size: 15, enabled: game.cookies >= cost) { if game.buyUpgrade(up) { Sound.play("snd/buy\(Int.random(in: 1...4)).mp3", 0.75); ui.popup = nil } }
-        } else {
-            Text("Locked.").font(.system(size: 12 * u, weight: .bold)).foregroundColor(.white.opacity(0.6))
+            .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
+        }
+        Line(u: u)
+        RichText(html: game.upgradeDesc(up), size: 11 * u, color: Color(white: 0.8))
+            .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        if !up.def.q.isEmpty { Line(u: u); Quote(text: up.def.q, u: u) }
+        if up.pool == "prestige" && up.owned == 0 && game.onAscend == 1 {
+            let parentsOK = (game.data.heavenlyParents[up.id] ?? []).filter { $0 != -1 }.allSatisfy { game.upgradesBID[$0]?.owned ?? 0 > 0 }
+            GameButton(text: "Buy", u: u, size: 15, enabled: game.heavenlyChips >= cost && parentsOK) { if game.buyUpgrade(up) { ui.popup = nil } }
         }
     }
 }
@@ -345,12 +385,19 @@ struct AchievInfo: View {
     let a: Achiev
     let u: CGFloat
     var body: some View {
+        let hidden = a.owned == 0 && a.def.pool == "shadow"
         PopupTitle(text: "Achievement info", u: u)
-        NameBox(icon: a.owned > 0 ? a.def.icon : [0, 7], name: a.owned > 0 || a.def.pool != "shadow" ? a.name : "???", tag: a.def.pool == "shadow" ? ("Shadow achievement", .purple.opacity(0.7)) : nil, u: u)
-        RichText(html: a.def.desc, size: 12 * u, align: .center)
-        if a.owned > 0 && !a.def.q.isEmpty { RichText(html: "<q>" + a.def.q + "</q>", size: 11 * u, align: .center) }
+        NameBox(icon: a.owned > 0 ? a.def.icon : [0, 7], name: hidden ? "???" : a.name, u: u)
         Line(u: u)
-        Text(a.owned > 0 ? "Unlocked." : "Locked.").font(.system(size: 12 * u, weight: .bold)).foregroundColor(a.owned > 0 ? .costGreen : .white.opacity(0.6))
+        HStack(spacing: 2 * u) {
+            TagPill(text: a.def.pool == "shadow" ? "Shadow achievement" : "Achievement", u: u, color: a.def.pool == "shadow" ? Color(hex: "9a7bff") : Color(white: 0.8))
+            TagPill(text: a.owned > 0 ? "Unlocked" : "Locked", u: u)
+        }
+        Line(u: u)
+        RichText(html: hidden ? "???" : a.def.desc, size: 11 * u, color: Color(white: 0.8))
+            .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
+            .frame(maxWidth: .infinity, alignment: .leading)
+        if a.owned > 0 && !a.def.q.isEmpty { Line(u: u); Quote(text: a.def.q, u: u) }
     }
 }
 
