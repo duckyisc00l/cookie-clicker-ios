@@ -167,6 +167,26 @@ enum CordovaBridgeScript {
   ].join('\n');
   (document.head || document.documentElement).appendChild(hdCss);
 
+  // --- store rows scroll in sync with their background ---
+  // The game paints the stone slabs on the scrolling list itself ("background-attachment: local").
+  // iOS can't move that kind of background on its fast scrolling path, so the slabs trail the rows'
+  // icons and text. Paint the same slab slice on each row (and on the upgrades list's full-height
+  // spacer) instead, so the picture is part of what scrolls. It looks the same as before.
+  var rowCss = [
+    '.storeList > .bar{background-image:url(hd/marbleSlabs.webp),url(hd/marbleSolid.webp);background-size:346px;' +
+      'height:49px;margin-bottom:0;border-bottom:1px solid transparent;isolation:isolate;}',
+    '.storeList > .bar.cantAfford,.storeList > .bar.mysterious{background-color:transparent;}',
+    '.storeList > .bar.cantAfford:before,.storeList > .bar.mysterious:before{content:"";position:absolute;' +
+      'left:0;right:0;top:0;bottom:0;background:rgba(50,50,50,0.6);z-index:-1;pointer-events:none;}',
+    '.storeList .scrollableListFiller{visibility:visible;background-image:url(hd/marbleSlabs.webp),url(hd/marbleSolid.webp);background-size:346px;}'
+  ];
+  for (var row = 1; row <= 80; row++) {
+    rowCss.push('.storeList > .bar:nth-child(' + row + '){background-position:0 ' + (-(row - 1) * 49) + 'px;}');
+  }
+  var rowStyle = document.createElement('style');
+  rowStyle.textContent = rowCss.join('\n');
+  (document.head || document.documentElement).appendChild(rowStyle);
+
   // wallpapers and milk are switched by the game while playing; follow those changes
   var HD = null;
   function hdSwap(el){
@@ -191,6 +211,67 @@ enum CordovaBridgeScript {
     if (missing) setTimeout(watchArt, 300);
   }
   fetch('hd/manifest.json').then(function(r){ return r.json(); }).then(function(map){ HD = map; watchArt(); }).catch(function(){});
+
+  // --- iPhone extras ---
+  // Save export/check/import for backups and QR transfer (same data as the game's own Export/Import).
+  window.__ccExportSave = function(){
+    if (!window.G || !G.Save) return null;
+    return { json: JSON.stringify(G.Save(true)), cookies: B(G.cookies) };
+  };
+  window.__ccCheckSave = function(text){
+    try {
+      text = String(text).trim();
+      if (text[0] !== '{') text = atob(text);
+      var d = JSON.parse(text);
+      if (!('cookies' in d) || !('buildings' in d) || !('upgrades' in d) || !('achievs' in d))
+        return { ok: false, error: "That isn't a Cookie Clicker save." };
+      if (d.lastVersion > VERSION) return { ok: false, error: 'That save is from a newer version of the game.' };
+      return { ok: true, cookies: B(d.cookies), played: sayTime(Date.now() - d.time) };
+    } catch (e) { return { ok: false, error: "Couldn't read that save." }; }
+  };
+  window.__ccImportSave = function(text){
+    text = String(text).trim();
+    if (text[0] !== '{') text = atob(text);
+    var d = JSON.parse(text);
+    if (G.closePopup) G.closePopup();
+    return G.Reset(true).then(function(){ G.LoadFromObject(d); });
+  };
+
+  // numbers for the Live Activity
+  var SUFFIX = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+  function shortNumber(n){
+    if (!isFinite(n)) return String(n);
+    if (n < 1000) return String(Math.floor(n));
+    var tier = Math.floor(Math.log10(n) / 3);
+    if (tier >= SUFFIX.length) return n.toExponential(1).replace('+', '');
+    var v = n / Math.pow(1000, tier);
+    return (v >= 100 ? Math.floor(v) : Math.floor(v * 10) / 10) + SUFFIX[tier];
+  }
+  setInterval(function(){
+    if (!window.G || typeof G.cookies !== 'number' || typeof B !== 'function') return;
+    call('stats', { cookies: B(G.cookies), short: shortNumber(G.cookies), cps: B(G.cookiesPs, 1) }).catch(noop);
+  }, 5000);
+
+  // "iPhone extras..." button under Export/Import in the Misc screen
+  setInterval(function(){
+    if (document.getElementById('ccExtras')) return;
+    var exportButton = Array.prototype.find.call(document.querySelectorAll('.bumpButton'), function(b){
+      return b.textContent.trim() === 'Export save file...';
+    });
+    if (!exportButton || !exportButton.parentNode) return;
+    var button = document.createElement('div');
+    button.id = 'ccExtras';
+    button.className = 'bumpButton';
+    button.textContent = 'iPhone extras...';
+    button.style.cssText = 'font-size:10px;background:rgba(0,0,0,0.25);margin-top:4px;';
+    button.addEventListener('click', function(e){
+      e.preventDefault();
+      try { PlaySound('snd/press.mp3', 0.15); } catch (x) {}
+      call('openExtras').catch(noop);
+    });
+    exportButton.parentNode.appendChild(document.createElement('br'));
+    exportButton.parentNode.appendChild(button);
+  }, 700);
 
   // what Cordova does once its plugins are ready
   document.addEventListener('DOMContentLoaded', function(){

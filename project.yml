@@ -19,6 +19,10 @@ targets:
       - path: CookieClicker/hd
         type: folder
         buildPhase: resources
+      - path: Shared
+    dependencies:
+      - target: CookieClickerWidgets
+        embed: true
     scheme: {}
     settings:
       base:
@@ -30,6 +34,30 @@ targets:
         SWIFT_VERSION: "5.0"
         MARKETING_VERSION: "1.0.0"
         CURRENT_PROJECT_VERSION: "10058"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""
+
+  # Live Activity (Lock Screen + Dynamic Island)
+  CookieClickerWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "16.2"
+    sources:
+      - path: Widgets
+        excludes:
+          - "Info.plist"
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.duckyisc00l.cookieclicker.widgets
+        PRODUCT_NAME: CookieClickerWidgets
+        INFOPLIST_FILE: Widgets/Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        MARKETING_VERSION: "1.0.0"
+        CURRENT_PROJECT_VERSION: "10058"
+        SKIP_INSTALL: "YES"
         CODE_SIGNING_ALLOWED: "NO"
         CODE_SIGNING_REQUIRED: "NO"
         CODE_SIGN_IDENTITY: ""

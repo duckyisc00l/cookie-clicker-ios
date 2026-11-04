@@ -12,6 +12,11 @@ final class NativeBridge: NSObject, WKScriptMessageHandlerWithReply {
 
     private var pendingPick: ((Any?, String?) -> Void)?
 
+    /// The "iPhone extras..." button in the Misc screen was tapped.
+    var onOpenExtras: (() -> Void)?
+    /// Cookie count and per-second, sent by the game every few seconds (for the Live Activity).
+    var onStats: (([String: Any]) -> Void)?
+
     /// Save files live here (the iOS equivalent of Cordova's dataDirectory).
     private lazy var savesDir: URL = {
         let base = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -82,6 +87,14 @@ final class NativeBridge: NSObject, WKScriptMessageHandlerWithReply {
         case "listFiles":
             let names = (try? fm.contentsOfDirectory(atPath: savesDir.path)) ?? []
             replyHandler(names, nil)
+
+        case "openExtras":
+            onOpenExtras?()
+            replyHandler(true, nil)
+
+        case "stats":
+            onStats?(args)
+            replyHandler(true, nil)
 
         case "openURL":
             if let s = args["url"] as? String, let url = URL(string: s) { UIApplication.shared.open(url) }

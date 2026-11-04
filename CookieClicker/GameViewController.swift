@@ -1,5 +1,6 @@
 import UIKit
 import WebKit
+import SwiftUI
 
 /// Full-screen web view that runs the game files from the APK (bundled in the `www` folder).
 final class GameViewController: UIViewController {
@@ -31,8 +32,16 @@ final class GameViewController: UIViewController {
         webView.navigationDelegate = self
         webView.uiDelegate = self
         if #available(iOS 16.4, *) { webView.isInspectable = true }
+        HighRefresh.apply(AppSettings.shared.highRefresh, to: config.preferences)
         bridge.viewController = self
         bridge.webView = webView
+        bridge.onOpenExtras = { [weak self] in self?.openExtras() }
+        bridge.onStats = { stats in
+            LiveActivityManager.shared.gameStats(
+                cookies: stats["cookies"] as? String ?? "0",
+                short: stats["short"] as? String ?? "0",
+                perSecond: stats["cps"] as? String ?? "0")
+        }
 
         let root = UIView()
         root.backgroundColor = .black
@@ -51,6 +60,48 @@ final class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         webView.load(URLRequest(url: LocalSchemeHandler.startURL))
+        applySettings()
+
+        let center = NotificationCenter.default
+        center.addObserver(self, selector: #selector(appBecameActive),
+                           name: UIApplication.didBecomeActiveNotification, object: nil)
+        center.addObserver(self, selector: #selector(appWillLeave),
+                           name: UIApplication.willResignActiveNotification, object: nil)
+        // regular backups while playing
+        backupTimer = Timer.scheduledTimer(withTimeInterval: 600, repeats: true) { [weak self] _ in
+            self?.autoBackup()
+        }
+    }
+
+    private var backupTimer: Timer?
+
+    @objc private func appBecameActive() {
+        applySettings()
+    }
+
+    /// Leaving the app: back up the save and send the latest numbers to the Live Activity.
+    @objc private func appWillLeave() {
+        LiveActivityManager.shared.push()
+        let task = UIApplication.shared.beginBackgroundTask(withName: "backup", expirationHandler: nil)
+        autoBackup { _ in UIApplication.shared.endBackgroundTask(task) }
+    }
+
+    private func autoBackup(_ completion: ((Bool) -> Void)? = nil) {
+        guard AppSettings.shared.autoBackup, BackupManager.shared.hasFolder else {
+            completion?(false)
+            return
+        }
+        backUpNow(completion)
+    }
+
+    private weak var extrasController: UIViewController?
+
+    private func openExtras() {
+        guard extrasController == nil else { return }
+        let view = ExtrasView(host: self, close: { [weak self] in self?.dismiss(animated: true) })
+        let controller = UIHostingController(rootView: view)
+        extrasController = controller
+        present(controller, animated: true)
     }
 
     override func viewSafeAreaInsetsDidChange() {
@@ -76,6 +127,67 @@ final class GameViewController: UIViewController {
         webView?.evaluateJavaScript(
             "window.__ccSafeInsets && window.__ccSafeInsets(\(insets.top), \(insets.bottom), \(width));",
             completionHandler: nil)
+    }
+}
+
+extension GameViewController: GameHost {
+    func applySettings() {
+        let settings = AppSettings.shared
+        UIApplication.shared.isIdleTimerDisabled = settings.keepAwake
+        if let prefs = webView?.configuration.preferences { HighRefresh.apply(settings.highRefresh, to: prefs) }
+        if !settings.liveActivity { LiveActivityManager.shared.endAll() }
+    }
+
+    func currentSave(_ completion: @escaping (String?, String?) -> Void) {
+        webView.evaluateJavaScript("window.__ccExportSave ? window.__ccExportSave() : null") { result, _ in
+            let info = result as? [String: Any]
+            completion(info?["json"] as? String, info?["cookies"] as? String)
+        }
+    }
+
+    func backUpNow(_ completion: ((Bool) -> Void)?) {
+        currentSave { json, _ in
+            guard let json = json else {
+                completion?(false)
+                return
+            }
+            // same format as the game's "Export save file..."
+            BackupManager.shared.backUp(exportText: Data(json.utf8).base64EncodedString(), completion: completion)
+        }
+    }
+
+    func receiveSave(_ json: String) {
+        let ask = { [weak self] in
+            guard let self = self else { return }
+            self.webView.callAsyncJavaScript("return window.__ccCheckSave(text);", arguments: ["text": json],
+                                              in: nil, in: .page) { result in
+                let info = (try? result.get()) as? [String: Any]
+                guard let info = info, (info["ok"] as? Bool) == true else {
+                    let reason = info?["error"] as? String ?? "That doesn't look like a Cookie Clicker save."
+                    self.showMessage(title: "Can't load this save", message: reason)
+                    return
+                }
+                let cookies = info["cookies"] as? String ?? "?"
+                let played = info["played"] as? String ?? "?"
+                let alert = UIAlertController(
+                    title: "Load this save?",
+                    message: "\(cookies) cookies, last played \(played) ago.\n\nThis replaces the game on this phone.",
+                    preferredStyle: .alert)
+                alert.addAction(UIAlertAction(title: "Cancel", style: .cancel))
+                alert.addAction(UIAlertAction(title: "Load", style: .destructive) { _ in
+                    self.webView.callAsyncJavaScript("window.__ccImportSave(text);", arguments: ["text": json],
+                                                     in: nil, in: .page, completionHandler: nil)
+                })
+                self.present(alert, animated: true)
+            }
+        }
+        if presentedViewController != nil { dismiss(animated: true, completion: ask) } else { ask() }
+    }
+
+    private func showMessage(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message, preferredStyle: .alert)
+        alert.addAction(UIAlertAction(title: "OK", style: .default))
+        present(alert, animated: true)
     }
 }
 

@@ -41,6 +41,14 @@
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
+	<key>NSSupportsLiveActivities</key>
+	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>The camera is used to scan QR codes when moving a save from another phone.</string>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>Saves the QR code picture of your save to Photos so you can scan it on another phone.</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 </dict>
