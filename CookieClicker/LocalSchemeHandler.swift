@@ -8,12 +8,13 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
     static let startURL = URL(string: "\(scheme)://app/index.html")!
 
     private let root: URL = Bundle.main.resourceURL!.appendingPathComponent("www", isDirectory: true)
+    private let hdRoot: URL = Bundle.main.resourceURL!.appendingPathComponent("hd", isDirectory: true)
 
     private static let mimeTypes: [String: String] = [
         "html": "text/html", "js": "text/javascript", "css": "text/css",
         "png": "image/png", "jpg": "image/jpeg", "jpeg": "image/jpeg", "gif": "image/gif",
         "ico": "image/x-icon", "mp3": "audio/mpeg", "ttf": "font/ttf", "json": "application/json",
-        "txt": "text/plain", "xml": "text/xml",
+        "txt": "text/plain", "xml": "text/xml", "webp": "image/webp",
     ]
 
     func webView(_ webView: WKWebView, start urlSchemeTask: WKURLSchemeTask) {
@@ -26,9 +27,14 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
         let ext = (path as NSString).pathExtension.lowercased()
         if path == "cordova.js" {
             data = CordovaBridgeScript.source.data(using: .utf8)
+        } else if path == "index.html" {
+            data = Self.sharpIndexHTML(from: root.appendingPathComponent("index.html"))
         } else {
-            let fileURL = root.appendingPathComponent(path).standardizedFileURL
-            if fileURL.path.hasPrefix(root.standardizedFileURL.path) {
+            // "hd/..." is the folder of sharper artwork; everything else comes from the game's www folder
+            let base = path.hasPrefix("hd/") ? hdRoot : root
+            let relative = path.hasPrefix("hd/") ? String(path.dropFirst(3)) : path
+            let fileURL = base.appendingPathComponent(relative).standardizedFileURL
+            if fileURL.path.hasPrefix(base.standardizedFileURL.path) {
                 data = try? Data(contentsOf: fileURL)
             } else {
                 data = nil
@@ -50,4 +56,18 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
     }
 
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
+
+    /// The game lays itself out 320 units wide and normally blows that up with a CSS scale, which
+    /// renders at 320px and then stretches the picture (blurry). Telling iOS the page is 320 wide
+    /// makes iOS zoom the page itself, so everything is drawn at the screen's real resolution.
+    private static func sharpIndexHTML(from url: URL) -> Data? {
+        guard let data = try? Data(contentsOf: url), var html = String(data: data, encoding: .utf8) else { return nil }
+        if let regex = try? NSRegularExpression(pattern: "<meta name=\"viewport\"[^>]*>", options: [.caseInsensitive]) {
+            let range = NSRange(html.startIndex..., in: html)
+            html = regex.stringByReplacingMatches(
+                in: html, options: [], range: range,
+                withTemplate: "<meta name=\"viewport\" content=\"width=320, user-scalable=no, viewport-fit=cover\">")
+        }
+        return html.data(using: .utf8)
+    }
 }

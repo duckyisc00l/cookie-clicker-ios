@@ -64,14 +64,17 @@ final class GameViewController: UIViewController {
     }
 
     private var lastSentInsets: UIEdgeInsets?
+    private var lastSentWidth: CGFloat = 0
 
     /// Tells the game how much room the notch and home bar take up.
     fileprivate func sendSafeArea(force: Bool = false) {
         let insets = view.safeAreaInsets
-        guard force || insets != lastSentInsets else { return }
+        let width = view.bounds.width
+        guard force || insets != lastSentInsets || width != lastSentWidth else { return }
         lastSentInsets = insets
+        lastSentWidth = width
         webView?.evaluateJavaScript(
-            "window.__ccSafeInsets && window.__ccSafeInsets(\(insets.top), \(insets.bottom));",
+            "window.__ccSafeInsets && window.__ccSafeInsets(\(insets.top), \(insets.bottom), \(width));",
             completionHandler: nil)
     }
 }

@@ -11,8 +11,12 @@ targets:
       - path: CookieClicker
         excludes:
           - "www/**"
+          - "hd/**"
           - "Info.plist"
       - path: CookieClicker/www
+        type: folder
+        buildPhase: resources
+      - path: CookieClicker/hd
         type: folder
         buildPhase: resources
     scheme: {}

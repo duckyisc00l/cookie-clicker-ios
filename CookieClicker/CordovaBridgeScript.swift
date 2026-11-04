@@ -83,14 +83,17 @@ enum CordovaBridgeScript {
   // --- edge-to-edge on notched iPhones ---
   // Backgrounds fill the whole screen; the top bar, screens, popups and tabs are kept clear of the
   // notch and home bar. Swift sends the safe-area sizes; they're converted to the game's 320px-wide units.
-  var safeTop = 0, safeBottom = 0;
+  var safeTop = 0, safeBottom = 0, screenWidth = 0;
   function applySafeArea(){
-    var w = document.documentElement.clientWidth || window.innerWidth || 320;
+    // insets arrive in screen points; the game's layout is 320 units across the screen width
+    var w = screenWidth || ((document.documentElement.clientWidth || 320) * ((window.visualViewport && window.visualViewport.scale) || 1));
     var k = 320 / w, s = document.documentElement.style;
     s.setProperty('--cc-sat', (safeTop * k) + 'px');
     s.setProperty('--cc-sab', (safeBottom * k) + 'px');
   }
-  window.__ccSafeInsets = function(top, bottom){ safeTop = top || 0; safeBottom = bottom || 0; applySafeArea(); };
+  window.__ccSafeInsets = function(top, bottom, width){
+    safeTop = top || 0; safeBottom = bottom || 0; screenWidth = width || 0; applySafeArea();
+  };
   window.addEventListener('resize', applySafeArea);
   var css = document.createElement('style');
   css.textContent = [
@@ -99,10 +102,90 @@ enum CordovaBridgeScript {
     '#tabs{box-sizing:content-box;height:40px;padding-bottom:var(--cc-sab,0px);}',
     '#tabs.bottomShelf:before{bottom:calc(var(--cc-sab,0px) - 3px);}',
     '#tabs.bottomShelf:after{content:"";pointer-events:none;position:absolute;left:0;right:0;bottom:0;' +
-      'height:var(--cc-sab,0px);background:url(img/bottomShelf.png) center bottom -3px / 320px 73px no-repeat;transform:scaleY(-1);z-index:-1;}',
-    '.popup{margin-top:calc(60px + var(--cc-sat,0px));margin-bottom:calc(44px + var(--cc-sab,0px));}'
+      'height:var(--cc-sab,0px);background:url(hd/bottomShelf.webp) center bottom -3px / 320px 73px no-repeat;transform:scaleY(-1);z-index:-1;}',
+    '.popup{margin-top:calc(60px + var(--cc-sat,0px));margin-bottom:calc(44px + var(--cc-sab,0px));}',
+    'html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}'
   ].join('\n');
   (document.head || document.documentElement).appendChild(css);
+
+  // --- sharp canvases ---
+  // The falling cookies (#rain) and the cursor ring (#cursorCanvas) are drawn on canvases sized in the
+  // game's 320-wide units. Give them device-resolution pixels; the game still sees its usual sizes.
+  function pixelScale(){
+    var dpr = window.devicePixelRatio || 1;
+    var zoom = (window.visualViewport && window.visualViewport.scale) || 1;
+    return Math.max(1, Math.min(4, dpr * zoom));
+  }
+  var CW = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'width');
+  var CH = Object.getOwnPropertyDescriptor(HTMLCanvasElement.prototype, 'height');
+  var getCtx = HTMLCanvasElement.prototype.getContext;
+  var sharpIds = { rain: true, cursorCanvas: true };
+  HTMLCanvasElement.prototype.getContext = function(type){
+    var ctx = getCtx.apply(this, arguments);
+    if (type !== '2d' || !ctx || this.__sharp || !sharpIds[this.id]) return ctx;
+    var canvas = this, k = pixelScale();
+    var lw = CW.get.call(canvas), lh = CH.get.call(canvas);
+    var setT = ctx.setTransform, resetT = ctx.resetTransform;
+    function base(){ setT.call(ctx, k, 0, 0, k, 0, 0); ctx.imageSmoothingQuality = 'high'; }
+    function resize(){
+      CW.set.call(canvas, Math.round(lw * k));
+      CH.set.call(canvas, Math.round(lh * k));
+      canvas.style.width = lw + 'px';
+      canvas.style.height = lh + 'px';
+      base();
+    }
+    Object.defineProperty(canvas, 'width', { configurable: true, get: function(){ return lw; }, set: function(v){ lw = +v || 0; resize(); } });
+    Object.defineProperty(canvas, 'height', { configurable: true, get: function(){ return lh; }, set: function(v){ lh = +v || 0; resize(); } });
+    ctx.setTransform = function(a, b, c, d, e, f){
+      if (typeof a !== 'number') { setT.apply(ctx, arguments); var m = ctx.getTransform(); a = m.a; b = m.b; c = m.c; d = m.d; e = m.e; f = m.f; }
+      setT.call(ctx, a * k, b * k, c * k, d * k, e * k, f * k);
+    };
+    ctx.resetTransform = base;
+    canvas.__sharp = true;
+    resize();
+    return ctx;
+  };
+
+  // --- sharper artwork ---
+  // AI-upscaled copies of the main artwork live in the app's hd folder. Each is shown at exactly
+  // the original's on-screen size, so only the sharpness changes. The originals in www are untouched.
+  var hdCss = document.createElement('style');
+  hdCss.textContent = [
+    '#bigCookie{background-image:url(hd/perfectCookie.webp);}',
+    '#back,#back2{background-image:url(hd/bgBlue.webp);background-size:512px 512px;}',
+    '.bottomShelf:before{background-image:url(hd/bottomShelf.webp);}',
+    '.storeList,.storeList .scrollableListContents{background-image:url(hd/marbleSlabs.webp),url(hd/marbleSolid.webp);}',
+    '.nameBox{background-image:linear-gradient(0deg,rgba(0,0,0,0.5),rgba(0,0,0,0.1)),url(hd/marbleSolid.webp);}',
+    '.popup{background-image:url(hd/darkNoise.webp);background-size:512px 512px;}',
+    '.woodBG{background-image:url(hd/woodPanels.webp);}',
+    '.buildingIcon{background-image:url(hd/buildings.webp);background-size:256px 1344px;}'
+  ].join('\n');
+  (document.head || document.documentElement).appendChild(hdCss);
+
+  // wallpapers and milk are switched by the game while playing; follow those changes
+  var HD = null;
+  function hdSwap(el){
+    var bg = el.style.backgroundImage;
+    if (!HD || !bg || bg.indexOf('img/') < 0) return;
+    var m = /img\/([A-Za-z0-9_]+)\.(png|jpg)/.exec(bg);
+    var size = m && HD[m[1] + '.' + m[2]];
+    if (!size) return;
+    el.style.backgroundImage = 'url(hd/' + m[1] + '.webp)';
+    el.style.backgroundSize = size[0] + 'px ' + size[1] + 'px';
+  }
+  function watchArt(){
+    var missing = false;
+    ['back', 'back2', 'milk'].forEach(function(id){
+      var el = document.getElementById(id);
+      if (!el) { missing = true; return; }
+      if (el.__hdWatched) return;
+      el.__hdWatched = true;
+      new MutationObserver(function(){ hdSwap(el); }).observe(el, { attributes: true, attributeFilter: ['style'] });
+      hdSwap(el);
+    });
+    if (missing) setTimeout(watchArt, 300);
+  }
+  fetch('hd/manifest.json').then(function(r){ return r.json(); }).then(function(map){ HD = map; watchArt(); }).catch(function(){});
 
   // what Cordova does once its plugins are ready
   document.addEventListener('DOMContentLoaded', function(){
