@@ -138,15 +138,15 @@ extension GameViewController: GameHost {
         if !settings.liveActivity { LiveActivityManager.shared.endAll() }
     }
 
-    func currentSave(_ completion: @escaping (String?, String?) -> Void) {
+    func currentSave(_ completion: @escaping (String?, String?, String?) -> Void) {
         webView.evaluateJavaScript("window.__ccExportSave ? window.__ccExportSave() : null") { result, _ in
             let info = result as? [String: Any]
-            completion(info?["json"] as? String, info?["cookies"] as? String)
+            completion(info?["json"] as? String, info?["compact"] as? String, info?["cookies"] as? String)
         }
     }
 
     func backUpNow(_ completion: ((Bool) -> Void)?) {
-        currentSave { json, _ in
+        currentSave { json, _, _ in
             guard let json = json else {
                 completion?(false)
                 return

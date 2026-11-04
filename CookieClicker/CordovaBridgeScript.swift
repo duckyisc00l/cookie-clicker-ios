@@ -214,15 +214,59 @@ enum CordovaBridgeScript {
 
   // --- iPhone extras ---
   // Save export/check/import for backups and QR transfer (same data as the game's own Export/Import).
+  // Packs the long upgrade/achievement lists ({"0":3,"1":0,...}) into bits so a save fits in one QR code.
+  // Lossless: unpackSave gives back exactly the same save.
+  function packSave(save){
+    var out = {};
+    Object.keys(save).forEach(function(k){
+      var v = save[k], keys = (v && typeof v === 'object' && !Array.isArray(v)) ? Object.keys(v) : null;
+      var packable = keys && keys.length > 16 && keys.every(function(key){
+        var x = v[key]; return /^\d+$/.test(key) && x === (x | 0) && x >= 0 && x <= 3;
+      });
+      if (!packable) { out[k] = v; return; }
+      var ids = keys.map(Number).sort(function(a, b){ return a - b; });
+      var n = ids[ids.length - 1] + 1;
+      var bytes = new Uint8Array(Math.ceil(n / 8) + Math.ceil(ids.length / 4));
+      var base = Math.ceil(n / 8);
+      ids.forEach(function(id, i){
+        bytes[id >> 3] |= 1 << (id & 7);
+        bytes[base + (i >> 2)] |= v[id] << ((i & 3) * 2);
+      });
+      var bin = ''; for (var i = 0; i < bytes.length; i++) bin += String.fromCharCode(bytes[i]);
+      out[k] = { '#p': btoa(bin), n: n, c: ids.length };
+    });
+    return out;
+  }
+  function unpackSave(save){
+    var out = {};
+    Object.keys(save).forEach(function(k){
+      var v = save[k];
+      if (!v || typeof v !== 'object' || typeof v['#p'] !== 'string') { out[k] = v; return; }
+      var bin = atob(v['#p']), base = Math.ceil(v.n / 8), obj = {}, i = 0;
+      for (var id = 0; id < v.n; id++) {
+        if (bin.charCodeAt(id >> 3) >> (id & 7) & 1) {
+          obj[id] = (bin.charCodeAt(base + (i >> 2)) >> ((i & 3) * 2)) & 3;
+          i++;
+        }
+      }
+      out[k] = obj;
+    });
+    return out;
+  }
+  function readSave(text){
+    text = String(text).trim();
+    if (text[0] !== '{') text = atob(text);
+    return unpackSave(JSON.parse(text));
+  }
+
   window.__ccExportSave = function(){
     if (!window.G || !G.Save) return null;
-    return { json: JSON.stringify(G.Save(true)), cookies: B(G.cookies) };
+    var save = G.Save(true);
+    return { json: JSON.stringify(save), compact: JSON.stringify(packSave(save)), cookies: B(G.cookies) };
   };
   window.__ccCheckSave = function(text){
     try {
-      text = String(text).trim();
-      if (text[0] !== '{') text = atob(text);
-      var d = JSON.parse(text);
+      var d = readSave(text);
       if (!('cookies' in d) || !('buildings' in d) || !('upgrades' in d) || !('achievs' in d))
         return { ok: false, error: "That isn't a Cookie Clicker save." };
       if (d.lastVersion > VERSION) return { ok: false, error: 'That save is from a newer version of the game.' };
@@ -230,9 +274,7 @@ enum CordovaBridgeScript {
     } catch (e) { return { ok: false, error: "Couldn't read that save." }; }
   };
   window.__ccImportSave = function(text){
-    text = String(text).trim();
-    if (text[0] !== '{') text = atob(text);
-    var d = JSON.parse(text);
+    var d = readSave(text);
     if (G.closePopup) G.closePopup();
     return G.Reset(true).then(function(){ G.LoadFromObject(d); });
   };

@@ -4,8 +4,8 @@ import UniformTypeIdentifiers
 
 /// What the extras screen needs from the game.
 protocol GameHost: AnyObject {
-    /// The current save as JSON, plus the cookie count as the game writes it.
-    func currentSave(_ completion: @escaping (_ json: String?, _ cookies: String?) -> Void)
+    /// The current save as JSON, the same save packed small (for QR codes), and the cookie count.
+    func currentSave(_ completion: @escaping (_ json: String?, _ compact: String?, _ cookies: String?) -> Void)
     /// Checks a save, asks to confirm, then loads it into the game.
     func receiveSave(_ json: String)
     func backUpNow(_ completion: ((Bool) -> Void)?)
@@ -130,9 +130,9 @@ struct ExtrasView: View {
 
     private func makeQRCodes() {
         working = true
-        host?.currentSave { json, cookies in
+        host?.currentSave { _, compact, cookies in
             DispatchQueue.global(qos: .userInitiated).async {
-                let payloads = json.flatMap { SaveTransfer.payloads(forSaveJSON: $0) }
+                let payloads = compact.flatMap { SaveTransfer.payloads(forSaveJSON: $0) }
                 let image = payloads.flatMap { SaveTransfer.sheetImage(payloads: $0, cookies: cookies) }
                 DispatchQueue.main.async {
                     working = false
