@@ -93,6 +93,7 @@ final class Game: ObservableObject {
     var explodeT = -1.0
 
     @Published var toasts: [Toast] = []
+    var toastLog: [Toast] = []
     @Published var frame = 0                 // bumps every draw so SwiftUI refreshes
     var pings: Set<String> = []
 
@@ -112,6 +113,7 @@ final class Game: ObservableObject {
         for b in MinigameBuffs.types { buffTypesBN[b.name] = b }
         shimmerTypes = [ShimmerType.golden(), ShimmerType.reindeer()]
         resetPools()
+        Fmt.format = UserDefaults.standard.integer(forKey: "numberFormat")
         Extras.setup(self)
     }
 
@@ -130,7 +132,9 @@ final class Game: ObservableObject {
     // MARK: toasts
     func toast(_ title: String, _ text: String, _ icon: [Int]? = nil, _ reverse: Bool = false) {
         DispatchQueue.main.async {
-            self.toasts.append(Toast(title: title, text: text, icon: icon))
+            let t = Toast(title: title, text: text, icon: icon)
+            self.toasts.append(t)
+            self.toastLog.append(t); if self.toastLog.count > 100 { self.toastLog.removeFirst() }
             if self.toasts.count > 6 { self.toasts.removeFirst(self.toasts.count - 6) }
         }
     }
@@ -170,7 +174,7 @@ final class Game: ObservableObject {
     func buyUpgrade(_ u: Upgrade) -> Bool {
         if u.pool == "prestige" {
             if u.owned > 0 { return false }
-            for parent in data.heavenlyParents[u.id] ?? [] { if upgradesBID[parent]?.owned ?? 0 == 0 { return false } }
+            for parent in data.heavenlyParents[u.id] ?? [] where parent != -1 { if upgradesBID[parent]?.owned ?? 0 == 0 { return false } }
             let cost = upgradeCost(u)
             if heavenlyChips < cost { return false }
             heavenlyChips -= cost; heavenlyChipsSpent += cost
