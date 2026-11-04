@@ -14,9 +14,14 @@ Rules source: CookieClicker/www/main.js (mobile engine "G"), mods/*.js, desktop 
 Save format = same JSON object as the mobile G.Save(true) so QR/backups move between apps.
 
 ## Batches
-1. [ ] Engine core: data, pools, cps, buildings, upgrades, achievements, buffs, golden cookies, logic loop, save/load
-2. [ ] UI: cookie screen, store, upgrades, stats/achievements, settings, toasts, news ticker
-3. [ ] Wrinklers, grandmapocalypse, research, seasons/drops, santa, dragon, ascension + heavenly tree, power clicks, milk/kittens, fortune
-4. [ ] Sugar lumps + levels, new buildings content, extras (iCloud backup, QR, Live Activity, keep awake)
-5. [ ] Minigames: Garden, Pantheon, Grimoire, Stock Market
-6. [ ] Build target in project.yml + workflow, test, ship
+Status (2026-11-04): all batches written; first IPA compiles on CI (build-swift.yml -> release swift-build-N).
+Not testable locally (no iOS simulator on Linux) -> user tests on device.
+Known gaps vs original: Fern tea / Ichor syrup don't exist in mobile data (garden drops skip them);
+no quick buttons UI; cookie "dislodge" is a simple drag-down; grandma/fools building pics approximate.
+
+1. [x] Engine core: data, pools, cps, buildings, upgrades, achievements, buffs, golden cookies, logic loop, save/load
+2. [x] UI: cookie screen, store, upgrades, stats/achievements, settings, toasts, news ticker
+3. [x] Wrinklers, grandmapocalypse, research, seasons/drops, santa, dragon, ascension + heavenly tree, power clicks, milk/kittens, fortune
+4. [x] Sugar lumps + levels, new buildings content, extras (iCloud backup, QR, Live Activity, keep awake)
+5. [x] Minigames: Garden, Pantheon, Grimoire, Stock Market
+6. [x] Build target in project.yml + workflow, test, ship

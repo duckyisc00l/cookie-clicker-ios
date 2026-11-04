@@ -76,7 +76,7 @@ struct RichText: View {
             i = html.index(after: i)
         }
         flush()
-        if base == nil { cache[key] = out }
+        if base == nil { if cache.count > 400 { cache.removeAll() }; cache[key] = out }
         return out
     }
 

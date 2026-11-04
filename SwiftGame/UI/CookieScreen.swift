@@ -35,7 +35,13 @@ struct CookieScreen: View {
                                     Sound.play("snd/clickb\(Int.random(in: 1...7)).mp3", 0.5)
                                 }
                             }
-                            .onEnded { _ in pressed = false })
+                            .onEnded { v in
+                                pressed = false
+                                // drag the cookie down into the milk
+                                if game.settings["dislodge"] && v.translation.height > 150 * u && !game.HasAchiev("Cookie-dunker") {
+                                    Sound.play("snd/shimmerClick.mp3", 1); game.win("Cookie-dunker")
+                                }
+                            })
                     // particles (floating numbers, crumbs)
                     ParticlesLayer(u: u)
                     // golden cookies and reindeer

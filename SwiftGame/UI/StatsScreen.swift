@@ -151,6 +151,9 @@ struct MiscScreen: View {
                     bigButton("Export save", [21, 6]) { exportSave() }
                     bigButton("Import save", [22, 6]) { importing = true }
                 }
+                if !game.HasAchiev("Olden days") {
+                    HStack { Spacer(); Button { game.win("Olden days"); Sound.play("snd/tick.mp3", 1); Sound.play("snd/shimmerClick.mp3", 1) } label: { IconView(icon: [12, 3], size: 20 * u) }.buttonStyle(.plain) }
+                }
                 Panel(title: nil, u: u) {
                     VStack(spacing: 6 * u) {
                         RichText(html: "Your game saves by itself every few seconds. You can also back it up as a file, or send it to another phone with a QR code in <b>iPhone extras</b>.", size: 11 * u, align: .center)

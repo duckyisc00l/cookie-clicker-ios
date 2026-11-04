@@ -127,7 +127,7 @@ struct PopupHost: View {
         case .settings: PopupFrame(u: u, insets: insets, closeText: "Confirm", close: close) { SettingsList(u: u) }
         case .news:
             PopupFrame(u: u, insets: insets, close: close) {
-                PopupTitle(text: "News", icon: [27, 7], u: u)
+                PopupTitle(text: "News", icon: [27, 7], u: u).onAppear { game.win("Tabloid addiction") }
                 if Ticker.shared.saved.isEmpty { Text("(no news on record.)").foregroundColor(.white) }
                 ForEach(Array(Ticker.shared.saved.enumerated()), id: \.offset) { _, n in
                     VStack(alignment: .leading, spacing: 1 * u) {
