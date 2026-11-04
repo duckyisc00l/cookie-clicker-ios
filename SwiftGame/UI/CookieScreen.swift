@@ -47,7 +47,7 @@ struct CookieScreen: View {
                     // buffs
                     BuffsColumn(u: u)
                     // sugar lump
-                    if Lumps.canLumps(game) && game.lumpT > 0 { LumpView(u: u).position(x: 28 * u, y: 40 * u) }
+                    if Lumps.canLumps(game) && game.lumpT > 0 { LumpView(u: u).position(x: 28 * u, y: 89 * u) }
                     // power clicks
                     if game.Has("Power clicks") { PowerClickButton(u: u).position(x: (w - 30) * u, y: (h - 34) * u) }
                 }
@@ -304,8 +304,7 @@ struct BuffsColumn: View {
                 .onTapGesture { ui.popup = .buff(b.id) }
             }
         }
-        .padding(.top, 70 * u)
-        .padding(.leading, 4 * u)
+        .padding(.top, 32 * u)
         .frame(maxHeight: .infinity, alignment: .top)
     }
 }
