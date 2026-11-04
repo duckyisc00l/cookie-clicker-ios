@@ -160,6 +160,17 @@ extension Game {
                 return true
             }
         }
+        // first launch after replacing the original app (same bundle id): pick up its save
+        let old = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0].appendingPathComponent("Saves")
+        for name in ["CookieClickerSave.txt", "CookieClickerSavePrev.txt"] {
+            if let text = try? String(contentsOf: old.appendingPathComponent(name), encoding: .utf8),
+               let o = Extras.readSave(text), o["cookies"] != nil {
+                load(from: o)
+                save()
+                toast("Welcome back!", "Your save from the old app has been loaded.", [10, 0])
+                return true
+            }
+        }
         return false
     }
 
