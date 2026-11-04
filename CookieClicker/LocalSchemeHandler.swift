@@ -11,11 +11,13 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
     private let hdRoot: URL = Bundle.main.resourceURL!.appendingPathComponent("hd", isDirectory: true)
     private let modsRoot: URL = Bundle.main.resourceURL!.appendingPathComponent("mods", isDirectory: true)
 
-    private static func joined(_ first: URL, _ second: URL) -> Data? {
+    private static func joined(_ first: URL, _ extras: [URL]) -> Data? {
         guard var data = try? Data(contentsOf: first) else { return nil }
-        if let extra = try? Data(contentsOf: second) {
-            data.append(Data("\n;\n".utf8))
-            data.append(extra)
+        for url in extras {
+            if let extra = try? Data(contentsOf: url) {
+                data.append(Data("\n;\n".utf8))
+                data.append(extra)
+            }
         }
         return data
     }
@@ -42,10 +44,13 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
         } else if path == "lib/main.js" {
             data = Self.smoothScrollingLib(from: root.appendingPathComponent("lib/main.js"))
         } else if path == "main.js" || path == "test_main.js" {
-            data = Self.withNewBuildingBuffs(from: root.appendingPathComponent(path))
+            data = Self.patchedMainJS(from: root.appendingPathComponent(path))
         } else if path == "data.js" || path == "test_data.js" {
             // the game's data, followed by the extra buildings, upgrades and cookies
-            data = Self.joined(root.appendingPathComponent(path), modsRoot.appendingPathComponent("more-content.js"))
+            data = Self.joined(root.appendingPathComponent(path), [
+                modsRoot.appendingPathComponent("more-content.js"),
+                modsRoot.appendingPathComponent("sugar-lumps.js"),
+            ])
         } else if path == "img/icons.png" || path == "img/buildings.png" {
             // the same sprite sheets with the new art added in extra columns/rows
             data = (try? Data(contentsOf: modsRoot.appendingPathComponent((path as NSString).lastPathComponent)))
@@ -78,18 +83,38 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
 
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
 
-    /// Golden cookies can boost (or rust) one building type; the game lists a buff name pair for every
-    /// building, so the new buildings from mods/more-content.js need theirs added to that list.
-    private static func withNewBuildingBuffs(from url: URL) -> Data? {
-        guard let data = try? Data(contentsOf: url), let js = String(data: data, encoding: .utf8) else { return nil }
-        let anchor = "'You':['Deduplication','Clone strike'],"
-        guard js.components(separatedBy: anchor).count == 2 else { return data }
-        let extra = anchor
-            + "'Black hole':['Event horizon','Evaporation'],"
-            + "'Galaxy':['Starburst','Galactic drift'],"
-            + "'Multiverse mixer':['Perfect blend','Lumpy batter'],"
-            + "'Big bang':['Cosmic dawn','Heat death'],"
-        return js.replacingOccurrences(of: anchor, with: extra).data(using: .utf8)
+    /// Changes to the game's main.js, applied as it's served (the file on disk stays original).
+    /// Each change is only made if its exact original text is found once.
+    private static func patchedMainJS(from url: URL) -> Data? {
+        guard let data = try? Data(contentsOf: url), var js = String(data: data, encoding: .utf8) else { return nil }
+        let patches: [(old: String, new: String, all: Bool)] = [
+            // golden cookie building buffs need a name pair for each new building
+            ("'You':['Deduplication','Clone strike'],",
+             "'You':['Deduplication','Clone strike'],'Black hole':['Event horizon','Evaporation'],'Galaxy':['Starburst','Galactic drift'],'Multiverse mixer':['Perfect blend','Lumpy batter'],'Big bang':['Cosmic dawn','Heat death'],",
+             false),
+            // sugar lumps are saved with the rest of the game
+            ("'tippedN'];",
+             "'tippedN','lumps','lumpsTotal','lumpT','lumpCurrentType','lumpRefill'];",
+             false),
+            // building levels are saved and loaded with each building
+            ("var transfer=['amount','amountMax','bought','cookiesMade'];",
+             "var transfer=['amount','amountMax','bought','cookiesMade','level'];",
+             true),
+            // each building level gives +1% to that building
+            ("myCps=(myCps+G.pool['building'+me.id+'A'])*G.pool['building'+me.id+'M'];",
+             "myCps=(myCps+G.pool['building'+me.id+'A'])*G.pool['building'+me.id+'M']*(1+(me.level||0)*0.01);",
+             false),
+            // level section in each building's info popup
+            ("<p class=\"switchTopIn\" style=\"text-align:right;color:rgba(255,255,255,0.65);\"><q>${me.getDesc()}</q></p>",
+             "${window.__ccLevelBox?window.__ccLevelBox(me):''}<p class=\"switchTopIn\" style=\"text-align:right;color:rgba(255,255,255,0.65);\"><q>${me.getDesc()}</q></p>",
+             false),
+        ]
+        for patch in patches {
+            let count = js.components(separatedBy: patch.old).count - 1
+            guard patch.all ? count >= 1 : count == 1 else { continue }
+            js = js.replacingOccurrences(of: patch.old, with: patch.new)
+        }
+        return js.data(using: .utf8)
     }
 
     /// The upgrades list only builds the rows on screen and checks the scroll position 4 times a second,
