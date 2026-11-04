@@ -1,64 +1,90 @@
 import SwiftUI
 
-/// Wooden screen title ("Special", "Stats", "Misc")
+/// Wooden screen title ("Special", "Stats", "Misc"): Georgia bold small caps on the rolling-pin banner
 struct ScreenTitle: View {
     let text: String
     let u: CGFloat
     var body: some View {
         HStack(spacing: 0) {
-            Sprites.image("pinLeft.png").resizable().frame(width: 30 * u, height: 35 * u)
-            Text(text.uppercased()).font(.merri(17 * u)).foregroundColor(Color(hex: "f2e2c4"))
-                .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
-                .padding(.horizontal, 8 * u)
-                .frame(height: 35 * u)
-                .background(Sprites.image("pinMid.png").resizable())
-            Sprites.image("pinRight.png").resizable().frame(width: 30 * u, height: 35 * u)
+            Sprites.image("pinLeft.png").resizable().frame(width: 30 * u, height: 35.5 * u)
+            HStack(spacing: 0) {
+                Text(String(text.prefix(1)).uppercased()).font(.georgia(18 * u, bold: true))
+                Text(String(text.dropFirst()).uppercased()).font(.georgia(13.5 * u, bold: true))
+            }
+            .kerning(2 * u)
+            .foregroundColor(Color(white: 0.8))
+            .shadow(color: .white, radius: 0, x: 0, y: -0.5 * u)
+            .shadow(color: .black, radius: 1 * u, x: 0, y: 1 * u)
+            .padding(.horizontal, 6 * u)
+            .frame(height: 35.5 * u)
+            .background(Tiled(name: "pinMid.png", scale: u * 0.5))
+            Sprites.image("pinRight.png").resizable().frame(width: 22 * u, height: 35.5 * u)
         }
-        .padding(.vertical, 6 * u)
+        .frame(height: 35.5 * u)
     }
 }
 
-/// a dark panel with a small header, like the original's "bumpy" boxes
+/// the original's ".bumpy" box border: 1px black inset, light top edge, faint inner ring, 4px corners
+struct BumpyBorder: View {
+    let u: CGFloat
+    var radius: CGFloat = 4
+    var body: some View {
+        ZStack {
+            RoundedRectangle(cornerRadius: radius * u).strokeBorder(Color.black, lineWidth: 1 * u)
+            RoundedRectangle(cornerRadius: radius * u).inset(by: 1 * u).strokeBorder(Color.white.opacity(0.1), lineWidth: 1 * u)
+            VStack(spacing: 0) { Color.white.opacity(0.2).frame(height: 2 * u).padding(.horizontal, 2 * u).padding(.top, 1 * u); Spacer(minLength: 0) }
+        }
+        .allowsHitTesting(false)
+    }
+}
+
+/// a "bumpy" section box with its black corner label (sliverHeader), like the Special screen
 struct Panel<Content: View>: View {
     let title: String?
     var icon: [Int]? = nil
     let u: CGFloat
     @ViewBuilder var content: () -> Content
     var body: some View {
-        VStack(alignment: .leading, spacing: 4 * u) {
-            if let t = title {
-                HStack(spacing: 3 * u) {
-                    if let i = icon { IconView(icon: i, size: 18 * u) }
-                    Text(t).font(.system(size: 11 * u, weight: .bold)).foregroundColor(.white)
-                }
-                .padding(.horizontal, 6 * u).padding(.vertical, 2 * u)
-                .background(Color.black.opacity(0.6))
-                .cornerRadius(3 * u)
-            }
+        ZStack(alignment: .topLeading) {
             content()
+                .font(.body(11 * u))
+                .foregroundColor(Color(white: 0.8))
+                .padding(.horizontal, 8 * u).padding(.vertical, 4 * u)
+                .padding(.top, title == nil ? 0 : 2 * u)
+                .frame(maxWidth: .infinity)
+                .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
+            if let t = title {
+                HStack(spacing: 0) {
+                    Text(t).font(.body(9.9 * u, bold: true)).foregroundColor(Color(white: 0.8))
+                }
+                .padding(.leading, (icon == nil ? 6 : 24) * u).padding(.trailing, 6 * u)
+                .frame(height: 16 * u)
+                .background(UnevenRoundedRectangle(topLeadingRadius: 4 * u, bottomTrailingRadius: 4 * u).fill(Color.black))
+                .overlay(alignment: .leading) { if let i = icon { IconView(icon: i, size: 24 * u).offset(x: 2 * u, y: -3 * u) } }
+                .offset(x: 2 * u, y: 2 * u)
+            }
         }
-        .padding(4 * u)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(RoundedRectangle(cornerRadius: 4 * u).fill(Color.black.opacity(0.35)))
-        .overlay(RoundedRectangle(cornerRadius: 4 * u).stroke(Color.white.opacity(0.12), lineWidth: 1))
+        .background(BumpyBorder(u: u))
     }
 }
 
+/// the original's ".bumpButton" (with the halfButton gradient)
 struct GameButton: View {
     let text: String
     let u: CGFloat
     var size: CGFloat = 13
     var enabled = true
+    var fancy = true
     let action: () -> Void
     var body: some View {
         Button(action: { if enabled { action() } else { Sound.play("snd/clickOff2.mp3", 0.5) } }) {
-            RichText(html: text, size: size * u, font: .fancy(size * u), align: .center)
-                .padding(.horizontal, 10 * u).padding(.vertical, 5 * u)
-                .frame(minWidth: 60 * u)
-                .background(RoundedRectangle(cornerRadius: 4 * u).fill(LinearGradient(colors: [Color.white.opacity(0.14), Color.black.opacity(0.15)], startPoint: .top, endPoint: .bottom)))
-                .overlay(RoundedRectangle(cornerRadius: 4 * u).stroke(Color.black, lineWidth: 1))
+            RichText(html: text, size: size * u, color: Color(white: 0.8), font: fancy ? .fancy(size * u) : .body(size * u, bold: true), align: .center)
+                .padding(.horizontal, 8 * u).padding(.vertical, 4 * u)
+                .background(RoundedRectangle(cornerRadius: 4 * u).fill(LinearGradient(colors: [Color.white.opacity(0.1), Color.black.opacity(0.1)], startPoint: .top, endPoint: .bottom)))
+                .background(BumpyBorder(u: u))
                 .opacity(enabled ? 1 : 0.5)
-                .gameShadow()
+                .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
         }
         .buttonStyle(PressStyle())
     }
@@ -68,11 +94,12 @@ struct SpecialScreen: View {
     @EnvironmentObject var game: Game
     @EnvironmentObject var ui: UIState
     let u: CGFloat
+    let m: Metrics
     var body: some View {
         let _ = game.frame
-        ScrollView {
-            VStack(spacing: 6 * u) {
-                ScreenTitle(text: "Special", u: u)
+        ScrollView(showsIndicators: false) {
+            VStack(spacing: 0) {
+                ScreenTitle(text: "Special", u: u).padding(.top, 66 * u).padding(.bottom, -2 * u)
                 legacy
                 if game.Has("Bingo center/Research facility") { research }
                 if game.elderWrath > 0 || game.pledges > 0 || game.Has("Elder Covenant") { grandmapocalypse }
@@ -82,7 +109,7 @@ struct SpecialScreen: View {
                 minigames
                 if game.Has("Classic dairy selection") || game.Has("Basic wallpaper assortment") { customization }
             }
-            .padding(.horizontal, 6 * u)
+            .padding(.horizontal, 8 * u)
             .padding(.bottom, 12 * u)
         }
     }

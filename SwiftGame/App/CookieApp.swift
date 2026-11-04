@@ -95,6 +95,6 @@ final class UIState: ObservableObject {
 enum PopupKind: Identifiable {
     case building(Int), upgrade(Int), achievement(Int), lumps, dragon, santa, seasons, research, dragonAura(Int)
     case ascend, confirmWipe, settings, news, log, extras, buff(UUID), message(String, String)
-    case permanentSlot(Int)
+    case permanentSlot(Int), upgradesList, achievsList
     var id: String { String(describing: self) }
 }

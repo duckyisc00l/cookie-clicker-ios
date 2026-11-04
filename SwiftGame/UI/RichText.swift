@@ -7,9 +7,11 @@ struct RichText: View {
     var color: Color = .white
     var font: Font? = nil
     var align: TextAlignment = .leading
+    var lineSpacing: CGFloat = 0
     var body: some View {
         Text(RichText.attributed(html, size: size, color: color, base: font))
             .multilineTextAlignment(align)
+            .lineSpacing(lineSpacing)
             .fixedSize(horizontal: false, vertical: true)
     }
 
@@ -32,9 +34,9 @@ struct RichText: View {
             guard !buf.isEmpty else { return }
             var s = AttributedString(decode(buf))
             let sz = size * (small > 0 ? 0.8 : 1)
-            var f = base ?? Font.system(size: sz)
+            var f = base ?? Font.custom("ArialMT", size: sz)
             if base != nil { f = base! }
-            if bold > 0 { f = f.bold() }
+            if bold > 0 { f = f.weight(.bold) }
             if italic > 0 || quote > 0 { f = f.italic() }
             s.font = f
             s.foregroundColor = colors.last ?? (quote > 0 ? color.opacity(0.75) : color)

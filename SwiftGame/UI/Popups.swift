@@ -1,6 +1,7 @@
 import SwiftUI
 
-/// The game's popup window: dark textured panel with a close button at the bottom.
+/// The game's popup window (the original's ".popup.framed"): dark noise panel 300 wide, fitted to its content,
+/// with the bumpy "Close" button at the bottom.
 struct PopupFrame<Content: View>: View {
     let u: CGFloat
     let insets: EdgeInsets
@@ -8,74 +9,116 @@ struct PopupFrame<Content: View>: View {
     let close: () -> Void
     @ViewBuilder var content: () -> Content
     var body: some View {
+        let inner = VStack(spacing: 4 * u) { content() }
+            .foregroundColor(Color(white: 0.8))
+            .padding(.horizontal, 16 * u).padding(.top, 8 * u).padding(.bottom, 4 * u)
+            .frame(width: 300 * u)
         ZStack {
-            Color.black.opacity(0.5).ignoresSafeArea().onTapGesture(perform: close)
+            Color.black.opacity(0.001).ignoresSafeArea().onTapGesture(perform: close)
             VStack(spacing: 0) {
-                ScrollView {
-                    VStack(spacing: 6 * u) { content() }
-                        .padding(.horizontal, 12 * u).padding(.vertical, 10 * u)
-                        .frame(maxWidth: .infinity)
+                ViewThatFits(in: .vertical) {
+                    inner
+                    ScrollView(showsIndicators: false) { inner }
                 }
                 Button(action: { Sound.play("snd/tickOff.mp3", 0.5); close() }) {
-                    Text(closeText).font(.fancy(14 * u)).foregroundColor(.white).gameShadow()
-                        .frame(maxWidth: .infinity).padding(8 * u)
-                        .background(LinearGradient(colors: [Color.white.opacity(0.1), Color.black.opacity(0.1)], startPoint: .top, endPoint: .bottom))
-                }.buttonStyle(PressStyle())
+                    Text(closeText).font(.fancy(14 * u)).bold().foregroundColor(Color(white: 0.8))
+                        .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
+                        .frame(width: 290 * u, height: 30 * u)
+                        .background(RoundedRectangle(cornerRadius: 4 * u).fill(LinearGradient(colors: [Color.white.opacity(0.1), Color.black.opacity(0.1)], startPoint: .top, endPoint: .bottom)))
+                        .background(BumpyBorder(u: u))
+                }
+                .buttonStyle(PressStyle())
+                .padding(5 * u)
             }
+            .frame(width: 300 * u)
             .background(Tiled(name: "darkNoise.jpg", scale: u))
-            .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color(hex: "a07b4e"), lineWidth: 2 * u))
-            .shadow(color: .black.opacity(0.7), radius: 6 * u)
+            .overlay(FrameBorder(u: u))
+            .shadow(color: .black.opacity(0.5), radius: 2 * u)
             .padding(.top, insets.top + 60 * u)
-            .padding(.bottom, insets.bottom + 44 * u)
-            .padding(.horizontal, 10 * u)
+            .padding(.bottom, insets.bottom + 44 * u + 40 * u)
         }
     }
 }
 
+/// the original's ".framed" 3px border (frameBorder.png)
+struct FrameBorder: View {
+    let u: CGFloat
+    var body: some View {
+        if let img = Sprites.ui("frameBorder.png") {
+            Image(uiImage: img)
+                .resizable(capInsets: EdgeInsets(top: 3, leading: 3, bottom: 3, trailing: 3), resizingMode: .tile)
+                .mask(RoundedRectangle(cornerRadius: 2 * u).strokeBorder(lineWidth: 3 * u))
+                .allowsHitTesting(false)
+        }
+    }
+}
+
+/// a popup heading (the original's h3): Fancy small caps on a dark horizontal fade with thin light lines
 struct PopupTitle: View {
     let text: String
     var icon: [Int]? = nil
     let u: CGFloat
     var body: some View {
-        HStack(spacing: 4 * u) {
-            if let i = icon { IconView(icon: i, size: 24 * u) }
-            RichText(html: text, size: 16 * u, font: .merri(15 * u), align: .center)
+        let fade = LinearGradient(colors: [.clear, Color.black.opacity(0.75), .clear], startPoint: .leading, endPoint: .trailing)
+        let line = LinearGradient(colors: [.clear, Color.white.opacity(0.25), .clear], startPoint: .leading, endPoint: .trailing)
+        HStack(spacing: 2 * u) {
+            if let i = icon { IconView(icon: i, size: 24 * u).padding(.vertical, -6 * u) }
+            Text(RichText.plain(text)).font(.fancy(15 * u).lowercaseSmallCaps()).foregroundColor(Color(white: 0.8))
         }
+        .padding(.horizontal, 8 * u).padding(.vertical, 4 * u)
         .frame(maxWidth: .infinity)
-        .gameShadow()
+        .background(fade)
+        .overlay(alignment: .top) { line.frame(height: 1).offset(y: -1) }
+        .overlay(alignment: .bottom) { line.frame(height: 1).offset(y: 1) }
+        .padding(.vertical, 4 * u)
+        .padding(.horizontal, -8 * u)
+        .shadow(color: .black, radius: 0, x: 1 * u, y: 1 * u)
     }
 }
 
+
+/// the original's <line>: a faint horizontal rule
 struct Line: View {
     let u: CGFloat
-    var body: some View { Rectangle().fill(Color.white.opacity(0.15)).frame(height: 1).padding(.vertical, 2 * u) }
+    var body: some View {
+        LinearGradient(colors: [.clear, Color.white.opacity(0.25), .clear], startPoint: .leading, endPoint: .trailing)
+            .frame(height: 1).padding(.horizontal, 13 * u).padding(.vertical, 6 * u)
+    }
 }
 
-/// icon + name header box (marble), like the original's info popups
+/// icon + name header box (the original's ".framed.nameBox": marble, 70 tall, framed)
 struct NameBox: View {
     let icon: [Int]?
     var building: Building? = nil
     let name: String
+    var sub: String? = nil
     var tag: (String, Color)? = nil
     let u: CGFloat
     var body: some View {
-        HStack(spacing: 6 * u) {
-            if let b = building { BuildingIcon(b: b, mysterious: false, u: u) }
-            else if let i = icon { IconView(icon: i, size: 48 * u) }
-            VStack(alignment: .leading, spacing: 2 * u) {
-                Text(name).font(.fancy(17 * u)).foregroundColor(.white).gameShadow()
-                if let t = tag {
-                    Text(t.0).font(.system(size: 10 * u, weight: .bold)).foregroundColor(.white)
-                        .padding(.horizontal, 5 * u).padding(.vertical, 1 * u)
-                        .background(RoundedRectangle(cornerRadius: 3 * u).fill(t.1))
-                }
+        HStack(spacing: 0) {
+            Group {
+                if let b = building { BuildingIcon(b: b, mysterious: false, u: u, size: 64) }
+                else if let i = icon { IconView(icon: i, size: 48 * u).frame(width: 64 * u, height: 64 * u) }
             }
-            Spacer()
+            .shadow(color: .black.opacity(0.5), radius: 2 * u, x: 3 * u, y: 3 * u)
+            VStack(spacing: 1 * u) {
+                if let t = tag {
+                    Text(t.0).font(.body(9 * u, bold: true)).foregroundColor(.white)
+                        .padding(.horizontal, 4 * u).padding(.vertical, 1 * u)
+                        .background(RoundedRectangle(cornerRadius: 2 * u).fill(t.1))
+                }
+                Text(name).font(.fancy(16 * u)).foregroundColor(Color(white: 0.8)).multilineTextAlignment(.center)
+                if let s = sub { Text(s).font(.body(10 * u, bold: true)).foregroundColor(Color(white: 0.8)) }
+            }
+            .frame(maxWidth: .infinity)
         }
-        .padding(8 * u)
-        .frame(minHeight: 64 * u)
-        .background(ZStack { Tiled(name: "marbleSolid.jpg", scale: u); LinearGradient(colors: [.black.opacity(0.1), .black.opacity(0.5)], startPoint: .top, endPoint: .bottom) })
-        .overlay(Rectangle().stroke(Color(hex: "a07b4e"), lineWidth: 2 * u))
+        .padding(3 * u)
+        .frame(width: 268 * u)
+        .frame(minHeight: 70 * u)
+        .background(ZStack { Tiled(name: "marbleSolid.jpg", scale: u * 300 / 692); LinearGradient(colors: [.black.opacity(0.1), .black.opacity(0.5)], startPoint: .top, endPoint: .bottom) })
+        .overlay(FrameBorder(u: u))
+        .shadow(color: .black, radius: 0.5 * u, x: 1 * u, y: 1 * u).shadow(color: .black, radius: 2 * u)
+        .padding(.vertical, 4 * u)
     }
 }
 
@@ -87,6 +130,14 @@ struct PopupHost: View {
     let insets: EdgeInsets
 
     func close() { ui.popup = nil }
+
+    func iconGrid(_ items: [([Int], PopupKind, Bool)]) -> some View {
+        LazyVGrid(columns: Array(repeating: GridItem(.fixed(44 * u), spacing: 0), count: 6), spacing: 0) {
+            ForEach(Array(items.enumerated()), id: \.offset) { _, it in
+                Button { ui.popup = it.1 } label: { IconView(icon: it.0, size: 44 * u).opacity(it.2 ? 1 : 0.35) }.buttonStyle(.plain)
+            }
+        }
+    }
 
     var body: some View {
         let _ = game.frame
@@ -155,7 +206,45 @@ struct PopupHost: View {
             }
         case .extras: PopupFrame(u: u, insets: insets, close: close) { EmptyView() }
         case .message(let what, _):
-            PopupFrame(u: u, insets: insets, close: close) { CosmeticPicker(milk: what == "milk", u: u) }
+            PopupFrame(u: u, insets: insets, close: close) {
+                if what == "about" {
+                    PopupTitle(text: "About", u: u)
+                    RichText(html: "<b>Cookie Clicker</b> is a game by <b>Orteil</b> and <b>Opti</b> (DashNet).<br><br>This version is the mobile game rewritten in Swift for iPhone, with sugar lumps, minigames and extra buildings added.<br><br>Thanks for playing!", size: 11 * u, color: Color(white: 0.8), align: .center)
+                } else if what == "versions" {
+                    PopupTitle(text: "Version history", u: u)
+                    RichText(html: "<b>Swift version</b><br>&bull; the whole game rewritten in Swift<br>&bull; sugar lumps and building levels<br>&bull; Garden, Pantheon, Grimoire and Stock Market<br>&bull; Black hole, Galaxy, Multiverse mixer and Big bang<br>&bull; iCloud backups, QR save transfer, Live Activity, 120 Hz", size: 11 * u, color: Color(white: 0.8))
+                } else {
+                    CosmeticPicker(milk: what == "milk", u: u)
+                }
+            }
+        case .upgradesList:
+            PopupFrame(u: u, insets: insets, close: close) {
+                let total = StatsScreen.upgradesTotal(game)
+                PopupTitle(text: "Upgrades", u: u)
+                Text("Owned: \(B(Double(game.upgradesN)))/\(B(Double(total))) (\(B(Double(game.upgradesN) / Double(max(1, total)) * 100, 1))% of total)").font(.body(11 * u)).opacity(0.75)
+                Line(u: u)
+                iconGrid(game.upgrades.filter { $0.owned > 0 && !["toggle", "prestige"].contains($0.pool) }.sorted { $0.def.order < $1.def.order }.map { ($0.def.icon, PopupKind.upgrade($0.id), true) })
+                let heavenly = game.upgrades.filter { $0.owned > 0 && $0.pool == "prestige" }
+                if !heavenly.isEmpty {
+                    Line(u: u)
+                    Text("Prestige upgrades").font(.body(11 * u, bold: true))
+                    iconGrid(heavenly.sorted { $0.def.order < $1.def.order }.map { ($0.def.icon, PopupKind.upgrade($0.id), true) })
+                }
+            }
+        case .achievsList:
+            PopupFrame(u: u, insets: insets, close: close) {
+                let total = StatsScreen.achievsTotal(game)
+                PopupTitle(text: "Achievements", u: u)
+                Text("Unlocked: \(B(Double(game.achievsN)))/\(B(Double(total))) (\(B(Double(game.achievsN) / Double(max(1, total)) * 100, 1))% of total)").font(.body(11 * u)).opacity(0.75)
+                Line(u: u)
+                iconGrid(game.achievs.filter { $0.def.pool != "shadow" }.sorted { $0.def.order < $1.def.order }.map { ($0.owned > 0 ? $0.def.icon : [0, 7], PopupKind.achievement($0.id), $0.owned > 0) })
+                let shadow = game.achievs.filter { $0.def.pool == "shadow" && $0.owned > 0 }
+                if !shadow.isEmpty {
+                    Line(u: u)
+                    RichText(html: "<b>Shadow achievements</b><br><small>(These are feats that are either unfair or difficult to attain. They do not give milk.)</small>", size: 11 * u, color: Color(white: 0.8), align: .center)
+                    iconGrid(shadow.map { ($0.def.icon, PopupKind.achievement($0.id), true) })
+                }
+            }
         case .permanentSlot(let i):
             PopupFrame(u: u, insets: insets, close: { ui.popup = nil }) { PermanentSlotPicker(slot: i, u: u) }
         }

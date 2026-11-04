@@ -15,8 +15,6 @@ struct CookieScreen: View {
                 ZStack(alignment: .topLeading) {
                     // falling cookies
                     if game.settings["particles"] { CookieRain(u: u, w: w, h: h, t: t, cps: game.cookiesPs) }
-                    // milk
-                    if game.settings["milk"] { Milk(u: u, w: w, h: h, t: t) }
                     // wrinklers behind the cookie
                     WrinklersLayer(u: u, cx: w / 2, cy: h / 2, t: t)
                     // cursors circling the cookie
@@ -66,19 +64,36 @@ struct BigCookie: View {
     let u: CGFloat
     let pressed: Bool
     let t: Double
+    /// the original's two spinning flares (spinFade / spinFade2, 3s loops), the whole shine turning once a minute
+    func flare(_ phase: Double, second: Bool) -> (Double, Double, Double) {
+        let p = phase.truncatingRemainder(dividingBy: 1)
+        if !second {
+            return (p * 90, 0.5 + p, p < 0.5 ? p / 0.5 * 0.75 : (1 - p) / 0.5 * 0.75)
+        }
+        if p < 0.5 { return (225 + p / 0.5 * 45, 1 + p, 0.75 * (1 - p / 0.5)) }
+        let q = (p - 0.5) / 0.5
+        return (180 + q * 45, 0.5 + q * 0.5, 0.75 * q)
+    }
     var body: some View {
         let wobble = game.settings["cookiewobble"] && game.settings["fancy"]
         let s: CGFloat = pressed ? 0.95 : (wobble ? 1 + 0.01 * sin(t * 1.5) : 1)
+        let f1 = flare(t / 3, second: false), f2 = flare(t / 3, second: true)
         ZStack {
             if game.settings["fancy"] {
-                Sprites.image("shine.png").resizable().frame(width: 420 * u, height: 420 * u)
-                    .rotationEffect(.degrees(t * 6)).opacity(0.5).blendMode(.screen).allowsHitTesting(false)
-                Sprites.image("cookieShadow.png").resizable().frame(width: 240 * u, height: 240 * u).offset(y: 8 * u).opacity(0.5)
+                ZStack {
+                    Sprites.image("flare.png").resizable().frame(width: 420 * u, height: 420 * u)
+                        .rotationEffect(.degrees(f1.0)).scaleEffect(f1.1).opacity(f1.2)
+                    Sprites.image("flare.png").resizable().frame(width: 420 * u, height: 420 * u)
+                        .rotationEffect(.degrees(f2.0)).scaleEffect(f2.1).opacity(f2.2)
+                }
+                .rotationEffect(.degrees(-(t / 60).truncatingRemainder(dividingBy: 1) * 360))
+                .allowsHitTesting(false)
+                Sprites.image("cookieShadow.png").resizable().frame(width: 267 * u, height: 267 * u).offset(x: 1.5 * u, y: 3 * u).scaleEffect(s)
             }
             Sprites.image(game.season == "fools" ? "brokenCookie.png" : "perfectCookie.png").resizable()
                 .frame(width: 240 * u, height: 240 * u)
                 .scaleEffect(s)
-                .animation(.easeOut(duration: 0.08), value: pressed)
+                .animation(.easeOut(duration: 0.1), value: pressed)
         }
         .frame(width: 240 * u, height: 240 * u)
         .contentShape(Circle())
@@ -117,25 +132,17 @@ struct Milk: View {
     let w: Double, h: Double, t: Double
     var body: some View {
         let pic = Cosmetics.milkPic(game)
-        let level = min(1, h / 640) * 0.9
-        let mh = 240.0 * level
-        ZStack(alignment: .bottomLeading) {
-            if let img = Sprites.ui(pic + ".png") {
-                Canvas { ctx, size in
-                    let tile = 240 * u
-                    let off = CGFloat((t * 30).truncatingRemainder(dividingBy: 240)) * u
-                    var x = -off
-                    while x < size.width {
-                        ctx.draw(Image(uiImage: img), in: CGRect(x: x, y: size.height - tile, width: tile, height: tile))
-                        x += tile
-                    }
-                }
-                .frame(width: w * u, height: mh * u)
-                .opacity(0.8)
+        Canvas { ctx, size in
+            guard let img = Sprites.ui(pic + ".png") else { return }
+            let tile = 240 * u
+            let off = CGFloat((t * 30).truncatingRemainder(dividingBy: 240)) * u
+            var x = -off - 52 * u
+            while x < size.width {
+                ctx.draw(Image(uiImage: img), in: CGRect(x: x, y: 0, width: tile, height: tile))
+                x += tile
             }
         }
-        .frame(width: w * u, height: h * u, alignment: .bottomLeading)
-        .allowsHitTesting(false)
+        .opacity(0.8)
     }
 }
 

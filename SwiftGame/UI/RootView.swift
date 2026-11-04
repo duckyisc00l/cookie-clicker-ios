@@ -13,6 +13,22 @@ enum SafeArea {
     }
 }
 
+/// Screen metrics in the original's 320-wide units (1 unit = 1 CSS px of the original game).
+struct Metrics {
+    let u: CGFloat        // points per unit
+    let H: CGFloat        // screen height in units
+    let T: CGFloat        // top safe area in units
+    let B: CGFloat        // bottom safe area in units
+    var tabsTop: CGFloat { H - B - 40 }
+}
+
+extension View {
+    /// place a view at x, y (units, from the screen's top-left) with size w×h (units)
+    func at(_ x: CGFloat, _ y: CGFloat, _ w: CGFloat, _ h: CGFloat, _ u: CGFloat) -> some View {
+        self.frame(width: w * u, height: h * u).position(x: (x + w / 2) * u, y: (y + h / 2) * u)
+    }
+}
+
 struct RootView: View {
     @EnvironmentObject var game: Game
     @EnvironmentObject var ui: UIState
@@ -21,43 +37,52 @@ struct RootView: View {
         GeometryReader { geo in
             let u = geo.size.width / 320
             let insets = SafeArea.insets
-            ZStack(alignment: .top) {
+            let m = Metrics(u: u, H: geo.size.height / u, T: insets.top / u, B: insets.bottom / u)
+            ZStack(alignment: .topLeading) {
                 Background(u: u)
                 if game.onAscend == 1 {
                     AscendView(u: u, insets: insets)
                 } else {
-                    VStack(spacing: 0) {
-                        TopStuff(u: u).padding(.top, insets.top)
-                        ZStack {
-                            switch ui.tab {
-                            case .cookie: CookieScreen(u: u)
-                            case .store: StoreScreen(u: u)
-                            case .special: SpecialScreen(u: u)
-                            case .stats: StatsScreen(u: u)
-                            case .misc: MiscScreen(u: u)
-                            }
+                    if ui.tab == .cookie && game.settings["milk"] {
+                        TimelineView(.animation(minimumInterval: 1.0 / 30)) { tl in
+                            Milk(u: u, w: 320, h: 240, t: tl.date.timeIntervalSinceReferenceDate)
                         }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        .clipped()
-                        TabBar(u: u, bottom: insets.bottom)
+                        .at(0, m.H - 240, 320, 240, u)
+                        .allowsHitTesting(false)
                     }
-                    ToastsView(u: u).padding(.bottom, insets.bottom + 48 * u)
+                    // the current screen fills the space between the top safe area and the tabs
+                    Group {
+                        switch ui.tab {
+                        case .cookie: CookieScreen(u: u)
+                        case .store: StoreScreen(u: u, m: m)
+                        case .special: SpecialScreen(u: u, m: m)
+                        case .stats: StatsScreen(u: u, m: m)
+                        case .misc: MiscScreen(u: u, m: m)
+                        }
+                    }
+                    .at(0, m.T, 320, m.tabsTop - m.T, u)
+                    .clipped()
+                    TopStuff(u: u, m: m)
+                    TabBar(u: u, m: m)
+                    ToastsView(u: u).at(0, m.T, 320, m.tabsTop - m.T - 8, u)
                 }
                 if let p = ui.popup {
                     PopupHost(kind: p, u: u, insets: insets)
-                        .transition(.opacity.combined(with: .scale(scale: 0.96)))
+                        .frame(width: geo.size.width, height: geo.size.height)
+                        .transition(.opacity)
                 }
-                if let m = ui.minigame {
-                    MinigameHost(name: m, u: u, insets: insets)
+                if let mg = ui.minigame {
+                    MinigameHost(name: mg, u: u, insets: insets)
+                        .frame(width: geo.size.width, height: geo.size.height)
                         .transition(.move(edge: .bottom))
                 }
             }
+            .frame(width: geo.size.width, height: geo.size.height, alignment: .topLeading)
             .environment(\.scale320, Scale(u: u))
-            .ignoresSafeArea()
             .onAppear { Ticker.shared.screenW = 320 }
         }
         .ignoresSafeArea()
-        .animation(.easeOut(duration: 0.18), value: ui.popup?.id)
+        .animation(.easeOut(duration: 0.15), value: ui.popup?.id)
         .animation(.easeOut(duration: 0.25), value: ui.minigame)
     }
 }
@@ -82,32 +107,38 @@ struct Background: View {
     }
 }
 
-// MARK: - top: news, cookie count, CpS
+// MARK: - top: news, cookie count, CpS (positions from the original: ticker at +2, count at +20, CpS at +40)
 
 struct TopStuff: View {
     @EnvironmentObject var game: Game
     let u: CGFloat
+    let m: Metrics
     var body: some View {
-        let _ = game.frame
-        VStack(spacing: 0) {
-            TickerView(u: u).frame(height: 18 * u)
+        ZStack(alignment: .topLeading) {
+            TickerView(u: u).at(0, m.T + 2, 320, 14, u)
             TimelineView(.animation(minimumInterval: 1.0 / 30)) { _ in
+                let buffed = game.cookiesPs != game.cookiesPsUnbuffed
                 VStack(spacing: 0) {
-                    HStack(spacing: 4 * u) {
-                        Text("\(B(game.cookiesD)) cookie\(B(game.cookiesD) == "1" ? "" : "s")")
-                            .font(.fancy(20 * u)).foregroundColor(.white).gameShadow()
-                    }
-                    let buffed = game.cookiesPs != game.cookiesPsUnbuffed
-                    Text("\(B(game.cookiesPs, 1))/s" + (game.cpsSucked > 0 ? " (\(B(game.cookiesPs * (1 - game.cpsSucked), 1)) after wrinklers)" : ""))
-                        .font(.fancy(12 * u))
+                    Text("\(B(game.cookiesD)) cookie\(B(game.cookiesD) == "1" ? "" : "s")")
+                        .font(.fancy(20 * u)).foregroundColor(.white).frame(height: 20 * u)
+                    Text("\(B(game.cookiesPs, 1))/s")
+                        .font(.fancy(12 * u)).frame(height: 12 * u)
                         .foregroundColor(buffed ? (game.cookiesPs > game.cookiesPsUnbuffed ? Color(hex: "ffd861") : .costRed) : .white)
-                        .gameShadow()
                 }
+                .lineLimit(1)
+                .topShadow(u)
             }
+            .at(0, m.T + 20, 320, 32, u)
+            Text("v.8 ADLESS").font(.custom("ArialMT", size: 8 * u)).foregroundColor(Color(white: 0.8).opacity(0.6)).at(273, m.T + 16, 43, 8, u)
         }
-        .padding(.bottom, 4 * u)
-        .frame(maxWidth: .infinity)
-        .background(LinearGradient(colors: [.black.opacity(0.55), .black.opacity(0)], startPoint: .top, endPoint: .bottom))
+        .allowsHitTesting(true)
+    }
+}
+
+extension View {
+    /// the original's top text shadow: 0 0 2px #000, 1px 1px 1px #000
+    func topShadow(_ u: CGFloat) -> some View {
+        self.shadow(color: .black, radius: 1 * u).shadow(color: .black, radius: 0.5 * u, x: 1 * u, y: 1 * u)
     }
 }
 
@@ -117,58 +148,55 @@ struct TickerView: View {
     var body: some View {
         TimelineView(.animation(minimumInterval: 1.0 / 30)) { _ in
             let t = Ticker.shared
-            GeometryReader { geo in
-                RichText(html: t.current.text, size: 13 * u, color: t.current.fortune != nil ? Color(hex: "ade000") : .white, font: .fancy(13 * u))
+            GeometryReader { _ in
+                RichText(html: t.current.text, size: 14 * u, color: t.current.fortune != nil ? Color(hex: "ade000") : .white, font: .fancy(14 * u))
                     .lineLimit(1)
                     .fixedSize()
                     .background(GeometryReader { g in Color.clear.onAppear { t.width = g.size.width / u }.onChange(of: t.current.text) { _ in t.width = g.size.width / u } })
                     .offset(x: t.x * u)
-                    .gameShadow()
+                    .topShadow(u)
                     .onTapGesture { t.tapped(game) }
             }
-            .clipped()
         }
     }
 }
 
-// MARK: - bottom tabs
+// MARK: - bottom tabs (bottomShelf.png behind 5 tabs of 64×40)
 
 struct TabBar: View {
     @EnvironmentObject var game: Game
     @EnvironmentObject var ui: UIState
     let u: CGFloat
-    let bottom: CGFloat
+    let m: Metrics
+    static let iconCol: [UIState.Tab: Int] = [.cookie: 0, .store: 2, .special: 1, .stats: 3, .misc: 4]
     var body: some View {
         let _ = game.frame
-        HStack(spacing: 0) {
+        ZStack(alignment: .topLeading) {
+            Sprites.image("bottomShelf.png").resizable().at(0, m.tabsTop - 5, 320, m.H - m.tabsTop + 8, u)
             ForEach(Array(UIState.Tab.allCases.enumerated()), id: \.offset) { i, tab in
                 let on = ui.tab == tab
-                Button {
+                let x = CGFloat(i) * 64
+                ZStack(alignment: .topLeading) {
+                    if on { Sprites.image("shadedBackdrop.png").resizable().at(0, -3, 64, 40, u) }
+                    SheetCell(sheet: "tabIcons.png", x: TabBar.iconCol[tab] ?? 0, y: on ? 0 : 1, w: 128, h: 128, width: 32 * u, height: 32 * u)
+                        .at(16, on ? -10 : -4, 32, 32, u)
+                    Text(tab.rawValue).font(.fancy(12 * u)).foregroundColor(on ? .white : Color(white: 0.8))
+                        .shadow(color: .black, radius: 1 * u, x: 1 * u, y: 1 * u)
+                        .fixedSize().at(0, on ? 21 : 24, 64, 12, u)
+                    if game.pings.contains(tab.rawValue.lowercased()) && !on {
+                        Sprites.image("pingDot.png").resizable().at(40, -4, 16, 16, u)
+                    }
+                }
+                .frame(width: 64 * u, height: 40 * u, alignment: .topLeading)
+                .contentShape(Rectangle())
+                .onTapGesture {
                     if ui.tab != tab { Sound.play("snd/press.mp3", 0.4) }
                     ui.tab = tab
                     game.pings.remove(tab.rawValue.lowercased())
-                } label: {
-                    ZStack {
-                        if on { Sprites.image("shadedBackdrop.png").resizable() }
-                        VStack(spacing: 0) {
-                            SheetCell(sheet: "tabIcons.png", x: i, y: on ? 0 : 1, w: 128, h: 128, width: 32 * u, height: 32 * u)
-                                .offset(y: on ? -1 * u : 2 * u)
-                            Text(tab.rawValue).font(.fancy(12 * u)).foregroundColor(on ? .white : Color(white: 0.8)).gameShadow()
-                                .padding(.top, -6 * u)
-                        }
-                        if game.pings.contains(tab.rawValue.lowercased()) && !on {
-                            Sprites.image("pingDot.png").resizable().frame(width: 12 * u, height: 12 * u).offset(x: 12 * u, y: -14 * u)
-                        }
-                    }
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 44 * u)
                 }
-                .buttonStyle(.plain)
+                .position(x: (x + 32) * u, y: (m.tabsTop + 20) * u)
             }
         }
-        .padding(.bottom, bottom)
-        .background(Tiled(name: "bottomBar.jpg", scale: u).ignoresSafeArea())
-        .overlay(alignment: .top) { Sprites.image("panelHorizontal.png").resizable().frame(height: 4 * u).offset(y: -2 * u) }
     }
 }
 
