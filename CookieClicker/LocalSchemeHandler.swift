@@ -9,6 +9,16 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
 
     private let root: URL = Bundle.main.resourceURL!.appendingPathComponent("www", isDirectory: true)
     private let hdRoot: URL = Bundle.main.resourceURL!.appendingPathComponent("hd", isDirectory: true)
+    private let modsRoot: URL = Bundle.main.resourceURL!.appendingPathComponent("mods", isDirectory: true)
+
+    private static func joined(_ first: URL, _ second: URL) -> Data? {
+        guard var data = try? Data(contentsOf: first) else { return nil }
+        if let extra = try? Data(contentsOf: second) {
+            data.append(Data("\n;\n".utf8))
+            data.append(extra)
+        }
+        return data
+    }
 
     private static let mimeTypes: [String: String] = [
         "html": "text/html", "js": "text/javascript", "css": "text/css",
@@ -31,6 +41,15 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
             data = Self.sharpIndexHTML(from: root.appendingPathComponent("index.html"))
         } else if path == "lib/main.js" {
             data = Self.smoothScrollingLib(from: root.appendingPathComponent("lib/main.js"))
+        } else if path == "main.js" || path == "test_main.js" {
+            data = Self.withNewBuildingBuffs(from: root.appendingPathComponent(path))
+        } else if path == "data.js" || path == "test_data.js" {
+            // the game's data, followed by the extra buildings, upgrades and cookies
+            data = Self.joined(root.appendingPathComponent(path), modsRoot.appendingPathComponent("more-content.js"))
+        } else if path == "img/icons.png" || path == "img/buildings.png" {
+            // the same sprite sheets with the new art added in extra columns/rows
+            data = (try? Data(contentsOf: modsRoot.appendingPathComponent((path as NSString).lastPathComponent)))
+                ?? (try? Data(contentsOf: root.appendingPathComponent(path)))
         } else {
             // "hd/..." is the folder of sharper artwork; everything else comes from the game's www folder
             let base = path.hasPrefix("hd/") ? hdRoot : root
@@ -58,6 +77,20 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
     }
 
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
+
+    /// Golden cookies can boost (or rust) one building type; the game lists a buff name pair for every
+    /// building, so the new buildings from mods/more-content.js need theirs added to that list.
+    private static func withNewBuildingBuffs(from url: URL) -> Data? {
+        guard let data = try? Data(contentsOf: url), let js = String(data: data, encoding: .utf8) else { return nil }
+        let anchor = "'You':['Deduplication','Clone strike'],"
+        guard js.components(separatedBy: anchor).count == 2 else { return data }
+        let extra = anchor
+            + "'Black hole':['Event horizon','Evaporation'],"
+            + "'Galaxy':['Starburst','Galactic drift'],"
+            + "'Multiverse mixer':['Perfect blend','Lumpy batter'],"
+            + "'Big bang':['Cosmic dawn','Heat death'],"
+        return js.replacingOccurrences(of: anchor, with: extra).data(using: .utf8)
+    }
 
     /// The upgrades list only builds the rows on screen and checks the scroll position 4 times a second,
     /// so fast scrolling shows empty space and late, fading rows. Build 6 extra rows above and below,

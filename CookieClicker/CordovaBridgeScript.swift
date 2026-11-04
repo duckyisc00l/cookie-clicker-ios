@@ -163,7 +163,7 @@ enum CordovaBridgeScript {
     '.nameBox{background-image:linear-gradient(0deg,rgba(0,0,0,0.5),rgba(0,0,0,0.1)),url(hd/marbleSolid.webp);}',
     '.popup{background-image:url(hd/darkNoise.webp);background-size:512px 512px;}',
     '.woodBG{background-image:url(hd/woodPanels.webp);}',
-    '.buildingIcon{background-image:url(hd/buildings.webp);background-size:256px 1344px;}'
+    '.buildingIcon{background-image:url(hd/buildings.webp);background-size:256px 1600px;}'
   ].join('\n');
   (document.head || document.documentElement).appendChild(hdCss);
 
