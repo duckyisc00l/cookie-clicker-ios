@@ -29,6 +29,8 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
             data = CordovaBridgeScript.source.data(using: .utf8)
         } else if path == "index.html" {
             data = Self.sharpIndexHTML(from: root.appendingPathComponent("index.html"))
+        } else if path == "lib/main.js" {
+            data = Self.smoothScrollingLib(from: root.appendingPathComponent("lib/main.js"))
         } else {
             // "hd/..." is the folder of sharper artwork; everything else comes from the game's www folder
             let base = path.hasPrefix("hd/") ? hdRoot : root
@@ -56,6 +58,25 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
     }
 
     func webView(_ webView: WKWebView, stop urlSchemeTask: WKURLSchemeTask) {}
+
+    /// The upgrades list only builds the rows on screen and checks the scroll position 4 times a second,
+    /// so fast scrolling shows empty space and late, fading rows. Build 6 extra rows above and below,
+    /// rebuild as soon as you scroll, and don't fade rows that appear from scrolling.
+    /// Each change only applies if the exact original code is found; otherwise the file is served unchanged.
+    private static func smoothScrollingLib(from url: URL) -> Data? {
+        guard let data = try? Data(contentsOf: url), var js = String(data: data, encoding: .utf8) else { return nil }
+        let patches: [(String, String)] = [
+            ("\tfirst=Math.max(0,Math.floor(offY/obj.itemH));",
+             "\tfirst=Math.max(0,Math.floor(offY/obj.itemH)-6);"),
+            ("\tlast=Math.min(data.length,first+Math.ceil(h/obj.itemH+1));",
+             "\tlast=Math.min(data.length,Math.floor(offY/obj.itemH)+Math.ceil(h/obj.itemH+1)+6);"),
+            ("let redrawI=0;",
+             "let redrawI=0;el.addEventListener('scroll',function(){if(Math.abs(scrollYonLastRender-el.scrollTop)>=obj.itemH*3){scrollY=el.scrollTop;oldData=data;data=obj.dataFunc();oldView=data.slice();render();}},{passive:true});"),
+        ]
+        guard patches.allSatisfy({ js.components(separatedBy: $0.0).count == 2 }) else { return data }
+        for (old, new) in patches { js = js.replacingOccurrences(of: old, with: new) }
+        return js.data(using: .utf8)
+    }
 
     /// The game lays itself out 320 units wide and normally blows that up with a CSS scale, which
     /// renders at 320px and then stretches the picture (blurry). Telling iOS the page is 320 wide

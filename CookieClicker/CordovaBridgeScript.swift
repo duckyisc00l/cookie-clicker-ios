@@ -104,7 +104,12 @@ enum CordovaBridgeScript {
     '#tabs.bottomShelf:after{content:"";pointer-events:none;position:absolute;left:0;right:0;bottom:0;' +
       'height:var(--cc-sab,0px);background:url(hd/bottomShelf.webp) center bottom -3px / 320px 73px no-repeat;transform:scaleY(-1);z-index:-1;}',
     '.popup{margin-top:calc(60px + var(--cc-sat,0px));margin-bottom:calc(44px + var(--cc-sab,0px));}',
-    'html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}'
+    'html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}',
+    // The 3D look is only needed during the 0.2s tab-switch animation. Keeping it on all the time stops
+    // iOS from scrolling the store lists on its fast path, so icons and text trail behind the scroll.
+    '#screens:not(:has(.switchLeft,.switchLeftIn,.switchRight,.switchRightIn,.switchTopIn)){perspective:none;}',
+    '#screens:not(:has(.switchLeft,.switchLeftIn,.switchRight,.switchRightIn,.switchTopIn)) .sectionTrimOverlay{transform:none;}',
+    '.storeList{will-change:scroll-position;}'
   ].join('\n');
   (document.head || document.documentElement).appendChild(css);
 
