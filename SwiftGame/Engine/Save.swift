@@ -1,6 +1,6 @@
 import Foundation
 
-struct Settings {
+struct GameSettings {
     var vals: [String: Int] = ["fancy": 1, "particles": 1, "cookiepops": 1, "cookiewobble": 1, "lowMotion": 0, "cursors": 1,
                                "diagnostic": 0, "debug": 0, "sound": 1, "pan": 0, "dislodge": 1, "shadows": 0, "milk": 1, "notScary": 0]
     var volume = 100

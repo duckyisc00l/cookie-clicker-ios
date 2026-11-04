@@ -61,7 +61,7 @@ extension Ticker {
 				
 				if g.buildingN("Mine")>0 { list.append(contentsOf:[choose([
 				"News : is our planet getting lighter? Experts examine the effects of intensive chocolate mining.",
-				"News : "+floor(rnd()*1000+2)+" miners trapped in collapsed chocolate mine!",
+				"News : "+Fmt.jsNumber(floor(rnd()*1000+2))+" miners trapped in collapsed chocolate mine!",
 				"News : chocolate mines found to cause earthquakes and sinkholes!",
 				"News : chocolate mine goes awry, floods village in chocolate!",
 				"News : depths of chocolate mines found to house \"peculiar, chocolaty beings\"!"

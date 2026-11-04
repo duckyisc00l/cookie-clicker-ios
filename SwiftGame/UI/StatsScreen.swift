@@ -1,4 +1,5 @@
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct StatsScreen: View {
     @EnvironmentObject var game: Game

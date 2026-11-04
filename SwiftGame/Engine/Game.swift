@@ -98,7 +98,7 @@ final class Game: ObservableObject {
     @Published var frame = 0                 // bumps every draw so SwiftUI refreshes
     var pings: Set<String> = []
 
-    var settings = Settings()
+    var settings = GameSettings()
     var onSave: (([String: Any]) -> Void)? = nil
 
     init() {

@@ -14,54 +14,52 @@ final class Pantheon: Minigame {
     var swapT = now()
     static let slotNames = ["Diamond", "Ruby", "Jade"]
 
-    static func g(_ s: String) -> String { "<span class=\"green\">" + s + "</span>" }
-    static func r(_ s: String) -> String { "<span class=\"red\">" + s + "</span>" }
 
     let gods: [God] = [
         God(key: "asceticism", name: "Holobore, Spirit of Asceticism", icon: [21, 18], descBefore: nil,
-            desc: [g("+15% base CpS."), g("+10% base CpS."), g("+5% base CpS.")],
-            descAfter: r("If a golden cookie is clicked, this spirit is unslotted and all worship swaps will be used up."),
+            desc: [greenT("+15% base CpS."), greenT("+10% base CpS."), greenT("+5% base CpS.")],
+            descAfter: redT("If a golden cookie is clicked, this spirit is unslotted and all worship swaps will be used up."),
             quote: "An immortal life spent focusing on the inner self, away from the distractions of material wealth."),
         God(key: "decadence", name: "Vomitrax, Spirit of Decadence", icon: [22, 18], descBefore: nil,
-            desc: [g("Golden and wrath cookie effect duration +7%.") + " " + r("Buildings grant -7% CpS."),
-                   g("Golden and wrath cookie effect duration +5%.") + " " + r("Buildings grant -5% CpS."),
-                   g("Golden and wrath cookie effect duration +2%.") + " " + r("Buildings grant -2% CpS.")],
+            desc: [greenT("Golden and wrath cookie effect duration +7%.") + " " + redT("Buildings grant -7% CpS."),
+                   greenT("Golden and wrath cookie effect duration +5%.") + " " + redT("Buildings grant -5% CpS."),
+                   greenT("Golden and wrath cookie effect duration +2%.") + " " + redT("Buildings grant -2% CpS.")],
             descAfter: nil, quote: "This sleazy spirit revels in the lust for quick easy gain and contempt for the value of steady work."),
-        God(key: "ruin", name: "Godzamok, Spirit of Ruin", icon: [23, 18], descBefore: g("Selling buildings triggers a buff boosted by how many buildings were sold."),
-            desc: [g("Buff boosts clicks by +1% for every building sold for 10 seconds."), g("Buff boosts clicks by +0.5% for every building sold for 10 seconds."), g("Buff boosts clicks by +0.25% for every building sold for 10 seconds.")],
+        God(key: "ruin", name: "Godzamok, Spirit of Ruin", icon: [23, 18], descBefore: greenT("Selling buildings triggers a buff boosted by how many buildings were sold."),
+            desc: [greenT("Buff boosts clicks by +1% for every building sold for 10 seconds."), greenT("Buff boosts clicks by +0.5% for every building sold for 10 seconds."), greenT("Buff boosts clicks by +0.25% for every building sold for 10 seconds.")],
             descAfter: nil, quote: "The embodiment of natural disasters. An impenetrable motive drives the devastation caused by this spirit."),
-        God(key: "ages", name: "Cyclius, Spirit of Ages", icon: [24, 18], descBefore: "CpS bonus fluctuating between " + g("+15%") + " and " + r("-15%") + " over time.",
+        God(key: "ages", name: "Cyclius, Spirit of Ages", icon: [24, 18], descBefore: "CpS bonus fluctuating between " + greenT("+15%") + " and " + redT("-15%") + " over time.",
             desc: ["Effect cycles over 3 hours.", "Effect cycles over 12 hours.", "Effect cycles over 24 hours."],
             descAfter: nil, quote: "This spirit knows about everything you'll ever do, and enjoys dispensing a harsh judgment."),
-        God(key: "seasons", name: "Selebrak, Spirit of Festivities", icon: [25, 18], descBefore: g("Some seasonal effects are boosted."),
-            desc: [g("Large boost.") + " " + r("Switching seasons is 100% pricier."), g("Medium boost.") + " " + r("Switching seasons is 50% pricier."), g("Small boost.") + " " + r("Switching seasons is 25% pricier.")],
+        God(key: "seasons", name: "Selebrak, Spirit of Festivities", icon: [25, 18], descBefore: greenT("Some seasonal effects are boosted."),
+            desc: [greenT("Large boost.") + " " + redT("Switching seasons is 100% pricier."), greenT("Medium boost.") + " " + redT("Switching seasons is 50% pricier."), greenT("Small boost.") + " " + redT("Switching seasons is 25% pricier.")],
             descAfter: nil, quote: "This is the spirit of merry getaways and regretful Monday mornings."),
         God(key: "creation", name: "Dotjeiess, Spirit of Creation", icon: [26, 18], descBefore: nil,
-            desc: [g("All buildings are <b>7% cheaper</b>.") + " " + r("Heavenly chips have 30% less effect."),
-                   g("All buildings are <b>5% cheaper</b>.") + " " + r("Heavenly chips have 20% less effect."),
-                   g("All buildings are <b>2% cheaper</b>.") + " " + r("Heavenly chips have 10% less effect.")],
+            desc: [greenT("All buildings are <b>7% cheaper</b>.") + " " + redT("Heavenly chips have 30% less effect."),
+                   greenT("All buildings are <b>5% cheaper</b>.") + " " + redT("Heavenly chips have 20% less effect."),
+                   greenT("All buildings are <b>2% cheaper</b>.") + " " + redT("Heavenly chips have 10% less effect.")],
             descAfter: nil, quote: "All things that be and ever will be were scripted long ago by this spirit's inscrutable tendrils."),
         God(key: "labor", name: "Muridal, Spirit of Labor", icon: [27, 18], descBefore: nil,
-            desc: [g("Clicking is <b>15%</b> more powerful.") + " " + r("Buildings produce 3% less."),
-                   g("Clicking is <b>10%</b> more powerful.") + " " + r("Buildings produce 2% less."),
-                   g("Clicking is <b>5%</b> more powerful.") + " " + r("Buildings produce 1% less.")],
+            desc: [greenT("Clicking is <b>15%</b> more powerful.") + " " + redT("Buildings produce 3% less."),
+                   greenT("Clicking is <b>10%</b> more powerful.") + " " + redT("Buildings produce 2% less."),
+                   greenT("Clicking is <b>5%</b> more powerful.") + " " + redT("Buildings produce 1% less.")],
             descAfter: nil, quote: "This spirit enjoys a good cheese after a day of hard work."),
         God(key: "industry", name: "Jeremy, Spirit of Industry", icon: [28, 18], descBefore: nil,
-            desc: [g("Buildings produce 10% more.") + " " + r("Golden and wrath cookies appear 10% less."),
-                   g("Buildings produce 6% more.") + " " + r("Golden and wrath cookies appear 6% less."),
-                   g("Buildings produce 3% more.") + " " + r("Golden and wrath cookies appear 3% less.")],
+            desc: [greenT("Buildings produce 10% more.") + " " + redT("Golden and wrath cookies appear 10% less."),
+                   greenT("Buildings produce 6% more.") + " " + redT("Golden and wrath cookies appear 6% less."),
+                   greenT("Buildings produce 3% more.") + " " + redT("Golden and wrath cookies appear 3% less.")],
             descAfter: nil, quote: "While this spirit has many regrets, helping you rule the world through constant industrialization is not one of them."),
         God(key: "mother", name: "Mokalsium, Mother Spirit", icon: [29, 18], descBefore: nil,
-            desc: [g("Milk is <b>10% more powerful</b>.") + " " + r("Golden and wrath cookies appear 15% less."),
-                   g("Milk is <b>5% more powerful</b>.") + " " + r("Golden and wrath cookies appear 10% less."),
-                   g("Milk is <b>3% more powerful</b>.") + " " + r("Golden and wrath cookies appear 5% less.")],
+            desc: [greenT("Milk is <b>10% more powerful</b>.") + " " + redT("Golden and wrath cookies appear 15% less."),
+                   greenT("Milk is <b>5% more powerful</b>.") + " " + redT("Golden and wrath cookies appear 10% less."),
+                   greenT("Milk is <b>3% more powerful</b>.") + " " + redT("Golden and wrath cookies appear 5% less.")],
             descAfter: nil, quote: "A caring spirit said to contain itself, inwards infinitely."),
-        God(key: "scorn", name: "Skruuia, Spirit of Scorn", icon: [21, 19], descBefore: r("All golden cookies are wrath cookies with a greater chance of a negative effect."),
-            desc: [g("Wrinklers appear 150% faster and digest 15% more cookies."), g("Wrinklers appear 100% faster and digest 10% more cookies."), g("Wrinklers appear 50% faster and digest 5% more cookies.")],
+        God(key: "scorn", name: "Skruuia, Spirit of Scorn", icon: [21, 19], descBefore: redT("All golden cookies are wrath cookies with a greater chance of a negative effect."),
+            desc: [greenT("Wrinklers appear 150% faster and digest 15% more cookies."), greenT("Wrinklers appear 100% faster and digest 10% more cookies."), greenT("Wrinklers appear 50% faster and digest 5% more cookies.")],
             descAfter: nil, quote: "This spirit enjoys poking foul beasts and watching them squirm, but has no love for its own family."),
         God(key: "order", name: "Rigidel, Spirit of Order", icon: [22, 19], descBefore: nil,
-            desc: [g("Sugar lumps ripen <b>1 hour</b> sooner."), g("Sugar lumps ripen <b>40 minutes</b> sooner."), g("Sugar lumps ripen <b>20 minutes</b> sooner.")],
-            descAfter: r("Effect is only active when your total amount of buildings ends with 0."),
+            desc: [greenT("Sugar lumps ripen <b>1 hour</b> sooner."), greenT("Sugar lumps ripen <b>40 minutes</b> sooner."), greenT("Sugar lumps ripen <b>20 minutes</b> sooner.")],
+            descAfter: redT("Effect is only active when your total amount of buildings ends with 0."),
             quote: "You will find that life gets just a little bit sweeter if you can motivate this spirit with tidy numbers and properly-filled tax returns."),
     ]
 
@@ -196,3 +194,6 @@ enum LumpRefill {
         g.refreshCps = true
     }
 }
+
+private func greenT(_ s: String) -> String { "<span class=\"green\">" + s + "</span>" }
+private func redT(_ s: String) -> String { "<span class=\"red\">" + s + "</span>" }

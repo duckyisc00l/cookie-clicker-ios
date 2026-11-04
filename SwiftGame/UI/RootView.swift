@@ -5,6 +5,14 @@ struct Scale { let u: CGFloat }
 private struct ScaleKey: EnvironmentKey { static let defaultValue = Scale(u: 1) }
 extension EnvironmentValues { var scale320: Scale { get { self[ScaleKey.self] } set { self[ScaleKey.self] = newValue } } }
 
+enum SafeArea {
+    static var insets: EdgeInsets {
+        let w = UIApplication.shared.connectedScenes.compactMap { ($0 as? UIWindowScene)?.keyWindow }.first
+        let i = w?.safeAreaInsets ?? .zero
+        return EdgeInsets(top: i.top, leading: i.left, bottom: i.bottom, trailing: i.right)
+    }
+}
+
 struct RootView: View {
     @EnvironmentObject var game: Game
     @EnvironmentObject var ui: UIState
@@ -12,7 +20,7 @@ struct RootView: View {
     var body: some View {
         GeometryReader { geo in
             let u = geo.size.width / 320
-            let insets = geo.safeAreaInsets
+            let insets = SafeArea.insets
             ZStack(alignment: .top) {
                 Background(u: u)
                 if game.onAscend == 1 {

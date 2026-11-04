@@ -38,7 +38,7 @@ final class Effects {
         var text: String? = nil
         var pic: String? = nil
         var x: Double, y: Double, xd: Double = 0, yd: Double = 0, r: Double = 0, rd: Double = 0
-        var s: Double = 1, life: Double = 1, t: Double = 0, grav: Double = 0.4
+        var s: Double = 1, grav: Double = 0.4, life: Double = 1, t: Double = 0
     }
     var particles: [Particle] = []
 

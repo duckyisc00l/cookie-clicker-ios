@@ -1,9 +1,6 @@
 import Foundation
 
 func jsRound(_ x: Double) -> Double { (x + 0.5).rounded(.down) }
-func + (l: String, r: Double) -> String { l + Fmt.jsNumber(r) }
-func + (l: Double, r: String) -> String { Fmt.jsNumber(l) + r }
-func + (l: String, r: Int) -> String { l + String(r) }
 
 struct NewsItem: Equatable {
     var text: String

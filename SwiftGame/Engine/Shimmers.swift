@@ -274,7 +274,7 @@ extension Game {
             if st.chain == 0 { st.totalFromChain = 0 }
             st.chain += 1
             let digit = me.wrath ? 6.0 : 7.0
-            if st.chain == 1 { st.chain += max(0, Int((log(cookies) / M_LN10).rounded(.up)) - 10) }
+            if st.chain == 1 { st.chain += max(0, Int((log(max(cookies, 1)) / M_LN10).rounded(.up)) - 10) }
             let maxPayout = min(cookiesPs * 60 * 60 * 6, cookies * 0.5) * mult
             let moni = max(digit, min((1.0 / 9 * pow(10, Double(st.chain)) * digit * mult).rounded(.down), maxPayout))
             let nextMoni = max(digit, min((1.0 / 9 * pow(10, Double(st.chain + 1)) * digit * mult).rounded(.down), maxPayout))
@@ -296,7 +296,7 @@ extension Game {
         default: break
         }
         if let b = buff { toast(b.type.nameD, buffDesc(b), b.type.icon, true) }
-        else if let (t, x) = popup { toast(t, x, nil, true) }
+        else if let pp = popup { toast(pp.0, pp.1, nil, true) }
         Seasons.dropEgg(self, 0.9)
         if me.spawnLead {
             gcClicks += 1; gcClicksTotal += 1

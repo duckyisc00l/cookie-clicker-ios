@@ -514,8 +514,8 @@ struct CosmeticPicker: View {
     var body: some View {
         PopupTitle(text: milk ? "Milk selector" : "Background selector", u: u)
         let items: [(Int, Cosmetic)] = milk
-            ? Array(Cosmetics.allMilks.enumerated()).filter { $0.element.type != 1 || game.Has("Fanciful dairy selection") }
-            : Array(Cosmetics.bgs.enumerated()).filter { i, _ in i < 13 || game.Has("Distinguished wallpaper assortment") }
+            ? Cosmetics.allMilks.enumerated().filter { $0.element.type != 1 || game.Has("Fanciful dairy selection") }.map { ($0.offset, $0.element) }
+            : Cosmetics.bgs.enumerated().filter { $0.offset < 13 || game.Has("Distinguished wallpaper assortment") }.map { ($0.offset, $0.element) }
         LazyVGrid(columns: Array(repeating: GridItem(.fixed(48 * u)), count: 5), spacing: 6 * u) {
             ForEach(items, id: \.0) { i, c in
                 Button {

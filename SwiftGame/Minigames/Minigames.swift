@@ -22,7 +22,7 @@ final class Minigames {
     var pantheon: Pantheon?
     var grimoire: Grimoire?
     var market: Market?
-    var all: [Minigame] { [garden, market, pantheon, grimoire].compactMap { $0 } }
+    var all: [Minigame] { let list: [Minigame?] = [garden, market, pantheon, grimoire]; return list.compactMap { $0 } }
 
     /// which building has which minigame
     static let buildingFor = ["Farm": "Garden", "Bank": "Stock Market", "Temple": "Pantheon", "Wizard tower": "Grimoire"]
