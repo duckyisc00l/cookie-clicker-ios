@@ -55,11 +55,12 @@ final class Minigames {
     }
     func onLevel(_ b: Building) { minigame(for: b)?.onLevel(b.level) }
     func onBuy(_ b: Building) { if b.def.name == "Farm" { garden?.computeStepT() } }
-    func onSell(_ b: Building) {
+    func onSell(_ b: Building, _ sold: Int) {
         guard let p = pantheon, isReady(p) else { return }
-        p.onSell(Game.shared)
+        p.onSell(Game.shared, sold)
     }
-    func onGoldenClick(_ g: Game) { pantheon?.onGoldenClick(g) }
+    func onGoldenClick(_ g: Game) { if let p = pantheon, isReady(p) { p.onGoldenClick(g) } }
+    func heavenlyMult() -> Double { if let p = pantheon, isReady(p) { return p.heavenlyMult() }; return 1 }
     func onBuffDie(_ name: String) {
         if name.hasPrefix("loan ") && !name.hasSuffix("interest"), let id = Int(name.dropFirst(5)) { market?.takeLoan(id, interest: true) }
     }

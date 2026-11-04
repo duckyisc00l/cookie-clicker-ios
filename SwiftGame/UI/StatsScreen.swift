@@ -91,7 +91,7 @@ struct StatsScreen: View {
         RichText(html: s, size: 12 * u, font: .fancy(12 * u), align: .center)
             .frame(maxWidth: .infinity)
             .padding(.vertical, 4 * u)
-            .background(Tiled(name: "woodPanels.png", scale: u * 0.5).opacity(0.9))
+            .background(Tiled(name: "woodPanels.png", scale: u).opacity(0.9))
             .gameShadow()
     }
 

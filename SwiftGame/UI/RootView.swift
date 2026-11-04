@@ -62,8 +62,8 @@ struct Background: View {
         let _ = game.frame
         let bg = Cosmetics.background(game, wrathD: wrathD)
         ZStack {
-            Tiled(name: bg.0, scale: u * 0.5)
-            if bg.2 > 0 { Tiled(name: bg.1, scale: u * 0.5).opacity(bg.2) }
+            Tiled(name: bg.0, scale: u)
+            if bg.2 > 0 { Tiled(name: bg.1, scale: u).opacity(bg.2) }
             Sprites.image("shadedEdges.png").resizable()
         }
         .ignoresSafeArea()

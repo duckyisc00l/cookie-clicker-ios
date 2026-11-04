@@ -22,7 +22,7 @@ struct PopupFrame<Content: View>: View {
                         .background(LinearGradient(colors: [Color.white.opacity(0.1), Color.black.opacity(0.1)], startPoint: .top, endPoint: .bottom))
                 }.buttonStyle(PressStyle())
             }
-            .background(Tiled(name: "darkNoise.jpg", scale: u * 0.5))
+            .background(Tiled(name: "darkNoise.jpg", scale: u))
             .overlay(RoundedRectangle(cornerRadius: 2).stroke(Color(hex: "a07b4e"), lineWidth: 2 * u))
             .shadow(color: .black.opacity(0.7), radius: 6 * u)
             .padding(.top, insets.top + 60 * u)
@@ -74,7 +74,7 @@ struct NameBox: View {
         }
         .padding(8 * u)
         .frame(minHeight: 64 * u)
-        .background(ZStack { Tiled(name: "marbleSolid.jpg", scale: u * 0.6); LinearGradient(colors: [.black.opacity(0.1), .black.opacity(0.5)], startPoint: .top, endPoint: .bottom) })
+        .background(ZStack { Tiled(name: "marbleSolid.jpg", scale: u); LinearGradient(colors: [.black.opacity(0.1), .black.opacity(0.5)], startPoint: .top, endPoint: .bottom) })
         .overlay(Rectangle().stroke(Color(hex: "a07b4e"), lineWidth: 2 * u))
     }
 }

@@ -25,6 +25,7 @@ struct RichText: View {
         var out = AttributedString()
         var bold = 0, italic = 0, small = 0, quote = 0
         var colors: [Color] = []
+        var divColored: [Bool] = []
         var i = html.startIndex
         var buf = ""
         func flush() {
@@ -59,6 +60,10 @@ struct RichText: View {
                 case "div", "p", "h3", "line":
                     if !out.characters.isEmpty && out.characters.last != "\n" { out += AttributedString("\n") }
                     if cname == "h3" { bold += closing ? -1 : 1 }
+                    if cname == "div" {
+                        if closing { if divColored.popLast() == true, !colors.isEmpty { colors.removeLast() } }
+                        else if let col = colorIn(tag) { colors.append(col); divColored.append(true) } else { divColored.append(false) }
+                    }
                 case "span", "font":
                     if closing { if !colors.isEmpty { colors.removeLast() } }
                     else if let col = colorIn(tag) { colors.append(col) } else { colors.append(colors.last ?? color) }

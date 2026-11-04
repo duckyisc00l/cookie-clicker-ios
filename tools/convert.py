@@ -64,5 +64,29 @@ for a in d['achievs']:
     out['achievs'].append(o)
 for t in d['buffTypes']:
     out['buffTypes'].append({k:t[k] for k in ['name','nameD','icon','t','pow','type','stackT','stackPow']}|{'desc':t['desc'] if isinstance(t['desc'],str) else None,'effs':N(t['effsFunc']['fn']) if t['effsFunc'] else None})
+
+# achievements for the minigames (desktop game), which the mobile game doesn't have
+MINIGAME_ACHIEVS=[
+ ('Bibbidi-bobbidi-boo','Cast <b>9</b> spells.',[21,11],''),
+ ("I'm the wiz",'Cast <b>99</b> spells.',[22,11],''),
+ ('A wizard is you',"Cast <b>999</b> spells.<q>I'm a what?</q>",[29,11],''),
+ ('Botany enthusiast','Harvest <b>100</b> mature garden plants.',[26,20],''),
+ ('Green, aching thumb','Harvest <b>1,000</b> mature garden plants.',[27,20],''),
+ ('In the garden of Eden (baby)',"Fill every tile of the biggest garden plot with plants.<q>Isn't tending to those precious little plants just so rock and/or roll?</q>",[28,20],''),
+ ('Keeper of the conservatory','Unlock every garden seed.',[25,20],''),
+ ('Seedless to nay','Convert a complete seed log into sugar lumps by sacrificing your garden to the sugar hornets.<br>Owning this achievement makes seeds <b>5% cheaper</b>, plants mature <b>5% sooner</b>, and plant upgrades drop <b>5% more</b>.',[29,20],''),
+ ('Initial public offering','Make your first stock market profit.',[0,33],''),
+ ('Rookie numbers','Own at least <b>100</b> of every stock market good.<q>Gotta pump those numbers up!</q>',[9,33],''),
+ ('No nobility in poverty','Own at least <b>500</b> of every stock market good.<q>What kind of twisted individual is out there cramming camels through needle holes anyway?</q>',[10,33],''),
+ ('Full warehouses','Own at least <b>1,000</b> of a stock market good.',[11,33],''),
+ ('Make my day','Make <b>a day</b> of CpS ($86,400) in 1 stock market sale.',[1,33],''),
+ ('Buy buy buy','Spend <b>a day</b> of CpS ($86,400) in 1 stock market purchase.',[1,33],''),
+ ('Liquid assets','Have your stock market profits surpass <b>$10,000,000</b>.',[12,33],''),
+ ('Gaseous assets','Have your stock market profits surpass <b>a whole year</b> of CpS ($31,536,000).<q>Boy, how volatile!</q>',[18,33],'shadow'),
+ ('Pyramid scheme','Unlock the <b>highest-tier</b> stock market headquarters.',[18,33],''),
+]
+for i,(n,desc,icon,pool) in enumerate(MINIGAME_ACHIEVS):
+    if any(a['name']==n for a in out['achievs']): continue
+    out['achievs'].append({'id':2300+i,'name':n,'desc':desc,'q':'','icon':icon,'pool':pool,'order':62000+i,'tier':None,'unimplemented':False,'unlock':None})
 json.dump(out,open(sys.argv[2],'w'),separators=(',',':'))
 print('special effects/conditions handled in Swift:',sorted(set(unknown)))

@@ -74,6 +74,7 @@ final class Game: ObservableObject {
 
     // computed / runtime
     var pool: [String: Double] = [:]
+    var cookiesPsRawHighest = 0.0
     var cookiesPs = 0.0, cookiesPsUnbuffed = 0.0, cookiesPc = 1.0, cpsSucked = 0.0
     var prestige = 0.0, gainedPrestige = 0.0
     var upgradesN = 0, achievsN = 0, buildingsN = 0, buildingsNmin = 0
@@ -272,12 +273,13 @@ final class Game: ObservableObject {
         var amount = amountIn
         if amount == -1 || amount == 10000 { amount = b.amount }
         var success = false
+        var sold = 0
         for _ in 0..<max(0, amount) {
             guard b.amount > 0 else { break }
             let c = (cost(b) * sellMultiplier()).rounded(.down)
             cookies += c
             cookiesEarned = max(cookies, cookiesEarned)
-            b.amount -= 1
+            b.amount -= 1; sold += 1
             refreshCps = true; success = true
         }
         if success, shimmerTypes[0].n <= 0, auraMult("Dragon Orbs") > 0 {
@@ -287,7 +289,7 @@ final class Game: ObservableObject {
                 toast("<b>Dragon Orbs!</b>", "Wish granted. Golden cookie spawned.", [33, 25], true)
             }
         }
-        if success { Sound.play("snd/sell\(Int.random(in: 1...4)).mp3", 0.75); computeBuildingAmounts(); Minigames.shared.onSell(b) }
+        if success { Sound.play("snd/sell\(Int.random(in: 1...4)).mp3", 0.75); computeBuildingAmounts(); Minigames.shared.onSell(b, sold) }
     }
     func forceSell(_ b: Building, _ amount: Int = 1) {
         for _ in 0..<max(1, amount) where b.amount > 0 { b.amount -= 1 }
@@ -401,6 +403,7 @@ final class Game: ObservableObject {
         cps = cps * p("cpsM") + p("cpsA")
         cps *= prestigeMult
         cookiesPsUnbuffed = cps
+        cookiesPsRawHighest = max(cookiesPsRawHighest, cps)
         cps = (cps + p("cpsBuffA")) * p("cpsBuffM")
         let oldCps = cps
         if cursed != nil { cps = 0 }
@@ -429,6 +432,7 @@ final class Game: ObservableObject {
         if Has("Heavenly confectionery") { m += 0.25 }
         if Has("Heavenly key") { m += 0.25 }
         m *= 1 + auraMult("Dragon God") * 0.05
+        m *= Minigames.shared.heavenlyMult()
         return m
     }
     static let HCfactor = 3.0

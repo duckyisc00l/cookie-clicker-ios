@@ -38,7 +38,7 @@ struct AscendView: View {
         let shown = pool.filter { (st[$0.id] ?? 0) > 0 && pos[$0.id] != nil }
         let z = zoom * pinch
         return ZStack {
-            Tiled(name: "starbg.jpg", scale: u * 0.5).ignoresSafeArea()
+            Tiled(name: "starbg.jpg", scale: u).ignoresSafeArea()
             Sprites.image("heavenRing1.jpg").resizable().frame(width: 300 * u, height: 300 * u).blendMode(.screen).opacity(0.4)
             GeometryReader { geo in
                 let cx = geo.size.width / 2 + offset.width + drag.width

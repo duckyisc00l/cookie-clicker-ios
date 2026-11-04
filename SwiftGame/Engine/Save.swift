@@ -37,7 +37,7 @@ extension Game {
             "dragonAura": dragonAura, "dragonAura2": dragonAura2, "fortuneGC": fortuneGC, "fortuneCPS": fortuneCPS,
             "powerClicks": powerClicks, "powerClicksTotal": powerClicksTotal, "bgType": bgType, "milkType": milkType,
             "chimeType": chimeType, "quickButtons": quickButtons, "tippedN": tippedN,
-            "lumps": lumps, "lumpsTotal": lumpsTotal, "lumpT": lumpT, "lumpCurrentType": lumpCurrentType, "lumpRefill": lumpRefill,
+            "lumps": lumps, "lumpsTotal": lumpsTotal, "lumpT": lumpT, "lumpCurrentType": lumpCurrentType, "lumpRefill": lumpRefill, "cookiesPsRawHighest": cookiesPsRawHighest,
         ]
         for (k, v) in vars { o[k] = v }
         o["researchT"] = researchT; o["researchTM"] = researchTM
@@ -102,7 +102,7 @@ extension Game {
         bgType = Int(num(o, "bgType")); milkType = Int(num(o, "milkType")); chimeType = Int(num(o, "chimeType"))
         quickButtons = o["quickButtons"] as? [Any] ?? []; tippedN = Int(num(o, "tippedN"))
         lumps = num(o, "lumps"); lumpsTotal = num(o, "lumpsTotal"); lumpT = num(o, "lumpT")
-        lumpCurrentType = Int(num(o, "lumpCurrentType")); lumpRefill = num(o, "lumpRefill")
+        lumpCurrentType = Int(num(o, "lumpCurrentType")); lumpRefill = num(o, "lumpRefill"); cookiesPsRawHighest = num(o, "cookiesPsRawHighest")
         researchT = num(o, "researchT"); researchTM = num(o, "researchTM")
         let ru = Int(num(o, "researchUpgrade")), rl = Int(num(o, "researchUpgradeLast"))
         researchUpgrade = (o["researchUpgrade"] != nil && ru != -1) ? upgradesBID[ru] : nil
@@ -178,7 +178,7 @@ extension Game {
         if hard { cookiesReset = 0 }
         cookiesEarned = 0; cookiesHandmade = 0
         if hard { cookiesTotal = 0 }
-        cookiesPs = 0; cookiesPsUnbuffed = 0; cookiesPc = 1
+        cookiesPs = 0; cookiesPsUnbuffed = 0; cookiesPc = 1; cookiesPsRawHighest = 0
         powerClicksOn = false; powerClicks = 0
         gcClicks = 0; reindeerClicks = 0
         if hard {

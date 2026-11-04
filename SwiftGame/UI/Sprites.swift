@@ -6,6 +6,13 @@ enum Sprites {
     private static var images: [String: UIImage] = [:]
     private static var crops: [String: UIImage] = [:]
     private static let lock = NSLock()
+    private static let hdManifest: [String: (Int, Int)] = {
+        guard let url = Bundle.main.url(forResource: "manifest", withExtension: "json", subdirectory: "hd"),
+              let d = try? Data(contentsOf: url), let o = try? JSONSerialization.jsonObject(with: d) as? [String: [Int]] else { return [:] }
+        var m: [String: (Int, Int)] = [:]
+        for (k, v) in o where v.count == 2 { m[k] = (v[0], v[1]) }
+        return m
+    }()
 
     /// name like "perfectCookie.png" or "img/perfectCookie.png" or "minigames/gardenPlants.png"
     static func ui(_ nameIn: String) -> UIImage? {
@@ -15,11 +22,17 @@ enum Sprites {
         let file = (name as NSString).lastPathComponent
         let base = (file as NSString).deletingPathExtension
         let ext = (file as NSString).pathExtension
-        let dirs = ["override", "hd", "img", "minigames", ""]
         var found: UIImage? = nil
-        for d in dirs {
-            if let url = Bundle.main.url(forResource: base, withExtension: ext, subdirectory: d.isEmpty ? nil : d),
-               let img = UIImage(contentsOfFile: url.path) { found = img; break }
+        // sharper art first (same size in points, more pixels)
+        if let size = hdManifest[file], let url = Bundle.main.url(forResource: base, withExtension: "webp", subdirectory: "hd"),
+           let data = try? Data(contentsOf: url), let img = UIImage(data: data), let cg = img.cgImage, size.0 > 0 {
+            found = UIImage(cgImage: cg, scale: CGFloat(cg.width) / CGFloat(size.0), orientation: .up)
+        }
+        if found == nil {
+            for d in ["override", "img", "minigames"] {
+                if let url = Bundle.main.url(forResource: base, withExtension: ext, subdirectory: d),
+                   let img = UIImage(contentsOfFile: url.path) { found = img; break }
+            }
         }
         if let f = found { images[name] = f }
         return found

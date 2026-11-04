@@ -9,7 +9,7 @@ struct StoreScreen: View {
         let _ = game.frame
         VStack(spacing: 0) {
             ZStack {
-                Tiled(name: "marbleSolid.jpg", scale: u * 0.6)
+                Tiled(name: "marbleSolid.jpg", scale: u)
                 if ui.storeTab == .buildings { BuildingList(u: u) } else { UpgradeList(u: u) }
             }
             StoreBottom(u: u)
@@ -231,7 +231,7 @@ struct StoreBottom: View {
         }
         .padding(.horizontal, 8 * u)
         .frame(height: 56 * u)
-        .background(Tiled(name: "woodPanels.png", scale: u * 0.5))
+        .background(Tiled(name: "woodPanels.png", scale: u))
         .overlay(alignment: .top) { Sprites.image("panelHorizontal.png").resizable().frame(height: 4 * u) }
     }
 
