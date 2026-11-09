@@ -3,11 +3,6 @@ name: Build IPA
 on:
   push:
     branches: [main]
-    paths-ignore:
-      - "SwiftGame/**"
-      - "swift-project.yml"
-      - "tools/**"
-      - ".github/workflows/build-swift.yml"
   workflow_dispatch:
 
 permissions:

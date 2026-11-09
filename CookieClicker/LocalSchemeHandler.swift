@@ -50,7 +50,21 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
             data = Self.joined(root.appendingPathComponent(path), [
                 modsRoot.appendingPathComponent("more-content.js"),
                 modsRoot.appendingPathComponent("sugar-lumps.js"),
+                modsRoot.appendingPathComponent("minigame-bridge.js"),
             ])
+        } else if path.hasPrefix("minigames/") {
+            // the minigame page and the desktop files it uses; anything else (art, sounds) comes from the game
+            let rest = String(path.dropFirst("minigames/".count))
+            let mg = modsRoot.appendingPathComponent("minigames").appendingPathComponent(rest).standardizedFileURL
+            if mg.path.hasPrefix(modsRoot.standardizedFileURL.path), let d = try? Data(contentsOf: mg) {
+                data = d
+            } else if rest == "img/icons.png" || rest == "img/buildings.png" {
+                data = (try? Data(contentsOf: modsRoot.appendingPathComponent((rest as NSString).lastPathComponent)))
+                    ?? (try? Data(contentsOf: root.appendingPathComponent(rest)))
+            } else {
+                let f = root.appendingPathComponent(rest).standardizedFileURL
+                data = f.path.hasPrefix(root.standardizedFileURL.path) ? try? Data(contentsOf: f) : nil
+            }
         } else if path == "img/icons.png" || path == "img/buildings.png" {
             // the same sprite sheets with the new art added in extra columns/rows
             data = (try? Data(contentsOf: modsRoot.appendingPathComponent((path as NSString).lastPathComponent)))
@@ -94,15 +108,19 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
              false),
             // sugar lumps are saved with the rest of the game
             ("'tippedN'];",
-             "'tippedN','lumps','lumpsTotal','lumpT','lumpCurrentType','lumpRefill'];",
+             "'tippedN','lumps','lumpsTotal','lumpT','lumpCurrentType','lumpRefill','cookiesPsRawHighest'];",
              false),
             // building levels are saved and loaded with each building
             ("var transfer=['amount','amountMax','bought','cookiesMade'];",
-             "var transfer=['amount','amountMax','bought','cookiesMade','level'];",
+             "var transfer=['amount','amountMax','bought','cookiesMade','level','minigameSave'];",
              true),
             // each building level gives +1% to that building
             ("myCps=(myCps+G.pool['building'+me.id+'A'])*G.pool['building'+me.id+'M'];",
              "myCps=(myCps+G.pool['building'+me.id+'A'])*G.pool['building'+me.id+'M']*(1+(me.level||0)*0.01);",
+             false),
+            // minigame effects (garden plants, gods) apply while computing CpS
+            ("G.pool['clickM']*=1+G.auraMult('Dragon Cursor')*0.05;",
+             "if (window.__ccMinigameEffs) window.__ccMinigameEffs(G.pool);G.pool['clickM']*=1+G.auraMult('Dragon Cursor')*0.05;",
              false),
             // level section in each building's info popup
             ("<p class=\"switchTopIn\" style=\"text-align:right;color:rgba(255,255,255,0.65);\"><q>${me.getDesc()}</q></p>",
