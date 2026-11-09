@@ -86,7 +86,7 @@ G.addData(function(){
 	document.head.appendChild(css);
 
 	//how much the desktop layout is shrunk to fit the phone (desktop minigames are ~430px wide)
-	const SCALE=0.745;
+	const SCALE=1;
 	const layout=function()
 	{
 		const box=document.getElementById('ccMinigameFrameBox');

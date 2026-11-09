@@ -151,6 +151,18 @@ Game.PopRandomWrinkler=function(){return G.PopRandomWrinkler()||0;};
 
 //---- desktop UI helpers (tooltips, prompts, lump refill)
 __ccDesktopUI();
+//on the phone, info boxes sit at the bottom of the screen (mobile.css) instead of following the mouse
+Game.tooltip.update=function()
+{
+	if (this.shouldHide) {this.hide();this.shouldHide=0;return;}
+	if (Game.drawT%10==0 && typeof(this.text)==='function')
+	{
+		var text=this.text();
+		if (text=='') this.tta.style.opacity='0';
+		else {this.tt.innerHTML=unescape(text);this.tta.style.opacity='1';}
+	}
+};
+Game.tooltip.wobble=function(){};
 
 //---- loading and running the minigames
 Game.ccLoaded={};
@@ -168,6 +180,31 @@ Game.ccLoad=function(name)
 		me.minigame.launch();
 		var save=me.l_b.minigameSave;
 		if (save) {me.minigame.reset(true);me.minigame.load(save);}
+		else if (name=='Bank' && me.minigame.setCols) {me.minigame.graphCols=1;me.minigame.setCols();me.minigame.toRedraw=2;}
+		if (name=='Farm' && !me.minigame.ccFit)
+		{
+			//only show the part of the plot that is unlocked, and make the tiles as big as the screen allows
+			var M=me.minigame;M.ccFit=1;
+			var build=M.buildPlot;
+			M.buildPlot=function()
+			{
+				var r=build.apply(this,arguments);
+				var lv=Math.max(1,Math.min(M.plotLimits.length,M.parent.level))-1,lim=M.plotLimits[lv];
+				var w=(lim[2]-lim[0])*M.tileSize,h=(lim[3]-lim[1])*M.tileSize;
+				var plot=l('gardenPlot');if (!plot) return r;
+				for (var y=0;y<6;y++) for (var x=0;x<6;x++)
+				{
+					var t=l('gardenTile-'+x+'-'+y);if (!t) continue;
+					t.style.left=((x-lim[0])*M.tileSize)+'px';t.style.top=((y-lim[1])*M.tileSize)+'px';
+				}
+				var avail=Math.max(200,(l('gardenField')?l('gardenField').clientWidth:300)-12);
+				var z=Math.min(1.75,avail/w);
+				plot.style.width=w+'px';plot.style.height=h+'px';
+				plot.style.setProperty('zoom',z,'important');
+				return r;
+			};
+			M.toRebuild=true;
+		}
 		Game.ccLoaded[name]=me.minigame;
 		if (P.__ccMinigameReady) P.__ccMinigameReady(name);
 	};
@@ -216,6 +253,49 @@ document.addEventListener('mousemove',ccTrack);
 document.addEventListener('mousedown',function(e){ccTrack(e);Game.mouseDown=1;});
 document.addEventListener('mouseup',function(){Game.mouseDown=0;});
 document.addEventListener('contextmenu',function(e){e.preventDefault();});
+
+//Pantheon: drag a spirit with your finger onto a slot (the desktop version uses the mouse)
+(function(){
+	var dragging=0;
+	var slotAt=function(x,y)
+	{
+		for (var i=0;i<3;i++)
+		{
+			var el=l('templeSlot'+i);if (!el) continue;
+			var b=el.getBoundingClientRect();
+			if (x>=b.left-8 && x<=b.right+8 && y>=b.top-8 && y<=b.bottom+8) return i;
+		}
+		return -1;
+	};
+	document.addEventListener('touchstart',function(e){
+		var t=e.target;
+		if (!t || !t.id || t.id.indexOf('templeGodDrag')!=0) return;
+		var M=Game.Objects['Temple'].minigame;if (!M) return;
+		var god=M.godsById[parseInt(t.id.slice(13))];if (!god) return;
+		ccTrack(e);
+		dragging=1;
+		M.dragGod(god);
+		e.preventDefault();
+	},{passive:false,capture:true});
+	document.addEventListener('touchmove',function(e){
+		if (!dragging) return;
+		ccTrack(e);
+		var M=Game.Objects['Temple'].minigame;
+		var s=slotAt(Game.mouseX,Game.mouseY);
+		if (s!=M.slotHovered) M.hoverSlot(s);
+		e.preventDefault();
+	},{passive:false,capture:true});
+	var end=function(e){
+		if (!dragging) return;
+		dragging=0;
+		var M=Game.Objects['Temple'].minigame;
+		M.hoverSlot(slotAt(Game.mouseX,Game.mouseY));
+		M.dropGod();
+		e.preventDefault();
+	};
+	document.addEventListener('touchend',end,{passive:false,capture:true});
+	document.addEventListener('touchcancel',end,{passive:false,capture:true});
+})();
 
 Game.ccLoop=function()
 {

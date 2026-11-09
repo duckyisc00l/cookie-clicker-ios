@@ -1,0 +1,56 @@
+/* Phone layout for the desktop minigames: one column, bigger buttons, info shown at the bottom of the screen. */
+html body{font-size:12px;}
+html body .row .rowSpecial{min-height:100vh;}
+html body #gardenBG,html body #bankBG,html body #templeBG,html body #grimoireBG{bottom:0!important;background-size:100% 100%,auto!important;}
+
+/* ---- info boxes: docked at the bottom, full width, like the phone game's popups */
+html body #tooltipAnchor{position:fixed!important;left:6px!important;right:6px!important;top:auto!important;bottom:calc(6px + var(--ccsab,0px))!important;width:auto!important;z-index:1000000002!important;}
+html body #tooltip{position:relative!important;left:0!important;top:0!important;max-width:none!important;width:auto!important;max-height:55vh;overflow-y:auto;box-sizing:border-box;padding:8px!important;font-size:12px;}
+html body #tooltip > div{width:auto!important;max-width:none!important;min-width:0!important;}
+html body #tooltipAnchor:after{content:'Tap anywhere to close';display:block;text-align:center;font-size:10px;color:rgba(255,255,255,0.55);padding:3px 0 0 0;text-shadow:0 1px 2px #000;}
+
+/* ---- Garden: plot on top, soils, then tools and seeds */
+html body #gardenContent{height:auto!important;padding:6px 6px 16px 6px!important;display:flex;flex-direction:column;}
+html body #gardenField{position:relative!important;order:1;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:100%!important;overflow:visible!important;padding-top:22px;}
+html body #gardenPlotSize{top:2px!important;font-size:11px;}
+html body #gardenPlot{zoom:1.2;margin:4px auto!important;}
+html body #gardenSoils{margin:6px 0!important;}
+html body #gardenSoils .gardenSeed{width:48px;height:48px;margin:0 3px;}
+html body #gardenSoils .gardenSeedIcon{left:0;top:0;}
+html body #gardenInfo{position:relative!important;margin:6px auto 0 auto!important;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;font-size:11px;}
+html body #gardenPanel{position:relative!important;order:2;left:auto!important;right:auto!important;top:auto!important;bottom:auto!important;width:auto!important;margin:8px 0 0 0!important;padding:4px 4px 8px 4px!important;overflow:visible!important;box-shadow:0 2px 8px rgba(0,0,0,0.5)!important;}
+html body .gardenPanelLabel{font-size:14px!important;margin-top:6px!important;}
+html body #gardenTools .gardenSeed{width:52px;height:52px;margin:0 4px;}
+html body #gardenTools .gardenSeedIcon{left:2px;top:2px;}
+html body #gardenSeeds{display:grid;grid-template-columns:repeat(6,1fr);gap:2px;padding:4px 2px;}
+html body #gardenSeeds .gardenSeed{width:100%;height:48px;}
+html body #gardenSeeds .gardenSeedIcon{left:50%;margin-left:-24px;top:0;}
+html body #gardenSeeds .gardenSeed.locked{display:none;}
+html body #gardenCursor,html body #gardenDrag{display:none!important;}
+
+/* ---- Stock Market: one good per line with big buttons */
+html body #bankContent{padding:4px 6px 16px 6px!important;}
+html body #bankHeader > div:first-child{font-size:11px;line-height:1.5;}
+html body .bankButton{font-size:13px!important;padding:6px 9px!important;margin:2px 1px!important;border-radius:3px;opacity:0.95;}
+html body .bankGood{width:calc(100% - 4px)!important;margin:3px 2px!important;padding:6px 4px!important;font-size:12px;}
+html body .bankGood .bankSymbol{font-size:12px!important;padding:3px 6px!important;}
+html body .bankViewHide{width:20px!important;height:20px!important;background-size:20px 20px!important;top:4px!important;right:6px!important;}
+html body #bankGraphBox{height:200px!important;margin:6px 0;border-radius:4px;}
+html body #bankBrokers,html body #bankOffice{font-size:12px;}
+
+/* ---- Pantheon */
+html body #templeContent{padding:8px 4px 16px 4px!important;}
+html body #templeGods{padding:8px 0!important;}
+html body .templeGod{margin:3px;}
+html body #templeInfo{font-size:12px!important;}
+
+/* ---- Grimoire */
+html body #grimoireContent{padding:8px 4px 16px 4px!important;}
+html body #grimoireSpells{padding:8px 0!important;}
+html body .grimoireSpell{margin:4px 3px;}
+html body #grimoireBar{height:22px!important;}
+html body #grimoireInfo{font-size:12px!important;}
+
+/* no hover-only effects on touch */
+html body .gardenTile:hover:before{animation:none!important;}
+html body .templeGod.ready:hover .templeIcon,html body .grimoireSpell.ready:hover .grimoireIcon,html body .gardenSeed:hover .gardenSeedIcon{animation:none!important;}
