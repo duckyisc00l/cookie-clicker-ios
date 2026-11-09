@@ -143,6 +143,24 @@ G.addData(function(){
 		unshackle.power=0.1;
 		unshackleParent=unshackle.name;
 	});
+	//place the new Unshackled upgrades on the heavenly upgrade map, continuing the ring after "Unshackled You"
+	(function(){
+		const spots=[[368,662],[272,706],[172,744],[70,772]];
+		let prev=864;
+		BUILDINGS.forEach(function(o,n){
+			const id=2000+n*20+15;
+			G.HeavenlyUpgradePositions[id]=spots[n]||[70-(n-3)*100,780];
+			G.HeavenlyUpgradeParents[id]=[prev];
+			prev=id;
+		});
+		//safety net: any heavenly upgrade without a spot on the map gets one instead of crashing the heaven screen
+		let extra=0;
+		for (const me of G.upgrades) if (me && me.pool=='prestige')
+		{
+			if (!G.HeavenlyUpgradePositions[me.id]) {G.HeavenlyUpgradePositions[me.id]=[-700+(extra%8)*100,1000+Math.floor(extra/8)*100];extra++;}
+			if (!G.HeavenlyUpgradeParents[me.id]) G.HeavenlyUpgradeParents[me.id]=[];
+		}
+	})();
 
 	const COOKIES=[
 		[`Stardust snickerdoodles`,`Rolled in cinnamon and a pinch of actual stardust, collected by very patient astronauts.`],
