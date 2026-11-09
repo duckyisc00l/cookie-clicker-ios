@@ -37,7 +37,10 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
 
         let data: Data?
         let ext = (path as NSString).pathExtension.lowercased()
-        if path == "cordova.js" {
+        if path == "hd-art.js" {
+            // swaps in the sharper artwork from the hd folder (used by the game and the minigames)
+            data = try? Data(contentsOf: modsRoot.appendingPathComponent("hd-art.js"))
+        } else if path == "cordova.js" {
             data = CordovaBridgeScript.source.data(using: .utf8)
         } else if path == "index.html" {
             data = Self.sharpIndexHTML(from: root.appendingPathComponent("index.html"))

@@ -151,6 +151,13 @@ enum CordovaBridgeScript {
     return ctx;
   };
 
+  // --- sharper artwork everywhere else (icons, golden cookies, wrinklers, menus...) ---
+  (function(){
+    var sc = document.createElement('script');
+    sc.src = 'hd-art.js';
+    (document.head || document.documentElement).appendChild(sc);
+  })();
+
   // --- sharper artwork ---
   // AI-upscaled copies of the main artwork live in the app's hd folder. Each is shown at exactly
   // the original's on-screen size, so only the sharpness changes. The originals in www are untouched.
