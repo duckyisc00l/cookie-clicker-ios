@@ -77,11 +77,19 @@ final class GameViewController: UIViewController {
 
     @objc private func appBecameActive() {
         applySettings()
+        GameNotifications.shared.clear()
     }
 
     /// Leaving the app: back up the save and send the latest numbers to the Live Activity.
     @objc private func appWillLeave() {
         LiveActivityManager.shared.push()
+        webView.evaluateJavaScript("window.__ccLumpInfo ? window.__ccLumpInfo() : null") { result, _ in
+            guard let info = result as? [String: Any],
+                  let ripeAt = (info["ripeAt"] as? NSNumber)?.doubleValue,
+                  let now = (info["now"] as? NSNumber)?.doubleValue else { return }
+            GameNotifications.shared.scheduleLump(ripeAt: ripeAt, now: now,
+                                                  autoHarvest: (info["autoHarvest"] as? Bool) ?? true)
+        }
         let task = UIApplication.shared.beginBackgroundTask(withName: "backup", expirationHandler: nil)
         autoBackup { _ in UIApplication.shared.endBackgroundTask(task) }
     }
@@ -136,6 +144,14 @@ extension GameViewController: GameHost {
         UIApplication.shared.isIdleTimerDisabled = settings.keepAwake
         if let prefs = webView?.configuration.preferences { HighRefresh.apply(settings.highRefresh, to: prefs) }
         if !settings.liveActivity { LiveActivityManager.shared.endAll() }
+        sendGameSettings()
+        GameNotifications.shared.askPermissionIfNeeded()
+    }
+
+    /// Tells the game about the settings it uses itself (auto-harvest, garden messages).
+    private func sendGameSettings() {
+        let s = AppSettings.shared
+        webView?.evaluateJavaScript("window.__ccSettings={autoHarvest:\(s.autoHarvest),gardenAlerts:\(s.gardenAlerts)};", completionHandler: nil)
     }
 
     func currentSave(_ completion: @escaping (String?, String?, String?) -> Void) {
@@ -205,6 +221,7 @@ extension GameViewController: WKNavigationDelegate {
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
         sendSafeArea(force: true)
+        sendGameSettings()
     }
 
     func webViewWebContentProcessDidTerminate(_ webView: WKWebView) {

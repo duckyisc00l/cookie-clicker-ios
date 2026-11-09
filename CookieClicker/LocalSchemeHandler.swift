@@ -51,6 +51,7 @@ final class LocalSchemeHandler: NSObject, WKURLSchemeHandler {
                 modsRoot.appendingPathComponent("more-content.js"),
                 modsRoot.appendingPathComponent("sugar-lumps.js"),
                 modsRoot.appendingPathComponent("minigame-bridge.js"),
+                modsRoot.appendingPathComponent("reminders.js"),
             ])
         } else if path.hasPrefix("minigames/") {
             // the minigame page and the desktop files it uses; anything else (art, sounds) comes from the game

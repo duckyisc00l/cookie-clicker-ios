@@ -43,6 +43,12 @@ struct ExtrasView: View {
                     Toggle("Keep screen awake", isOn: $settings.keepAwake)
                 }
 
+                Section(header: Text("Sugar lumps & garden"), footer: Text("Auto-harvest picks your sugar lump as soon as it's ripe while the game is open. The notification tells you when it's ripe while the game is closed. Garden messages pop up in the game when plants are ready or about to wither (the garden only grows while the game is open).")) {
+                    Toggle("Auto-harvest sugar lumps", isOn: $settings.autoHarvest)
+                    Toggle("Notify me when a lump is ripe", isOn: $settings.lumpNotify)
+                    Toggle("Garden messages", isOn: $settings.gardenAlerts)
+                }
+
                 Section(header: Text("Live Activity"), footer: Text(LiveActivityManager.shared.isAvailable || !settings.liveActivity
                     ? "Shows your cookies on the Lock Screen and in the Dynamic Island. It updates while you play."
                     : "Live Activities are turned off for this app. Turn them on in Settings → Cookie Clicker.")) {
@@ -104,6 +110,9 @@ struct ExtrasView: View {
         .onChange(of: settings.highRefresh) { _ in host?.applySettings() }
         .onChange(of: settings.keepAwake) { _ in host?.applySettings() }
         .onChange(of: settings.liveActivity) { _ in host?.applySettings() }
+        .onChange(of: settings.autoHarvest) { _ in host?.applySettings() }
+        .onChange(of: settings.lumpNotify) { _ in host?.applySettings() }
+        .onChange(of: settings.gardenAlerts) { _ in host?.applySettings() }
         .fileImporter(isPresented: $showImporter,
                       allowedContentTypes: importingFolder ? [.folder] : [.plainText, .text, .data],
                       allowsMultipleSelection: false) { result in
