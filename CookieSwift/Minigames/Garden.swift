@@ -482,7 +482,7 @@ final class Garden: Minigame {
         var children = ""
         for c in me.children {
             guard let it = plantsBN[c] else { continue }
-            children += it.unlocked ? gardenIcon(0, it.icon) + " " : "<span class=\"tinyIcon\" style=\"background-position:0px \(-7 * 48)px;opacity:0.35;\"></span> "
+            children += it.unlocked ? "<span class=\"gardenSeedTiny\" style=\"background-position:0px \(-it.icon * 48)px;\"></span>" : "<span class=\"gardenSeedTiny\" style=\"background-image:url(img/icons.png);background-position:0px \(-7 * 48)px;opacity:0.35;\"></span>"
         }
         let dragonBoost = 1 / (1 + 0.05 * G.auraMult("Supreme Intellect"))
         let avg = me.ageTick + me.ageTickR / 2

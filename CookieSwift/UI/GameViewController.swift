@@ -35,7 +35,6 @@ final class GameViewController: UIViewController {
                 else if shot.hasPrefix("popup-") { DebugShots.open(String(shot.dropFirst(6))) }
                 else { G.setScreen(shot, force: true) }
             }
-            DebugLog.log("starting loop")
             lastTime = nowMs()
             startLoop()
         }
@@ -72,8 +71,5 @@ final class GameViewController: UIViewController {
         lastTime = now
         G._Logic(delta)
         root.draw()
-        if G.T % 150 == 0, ProcessInfo.processInfo.environment["CC_SHOT"] != nil {
-            DebugLog.log(String(format: "T=%d milk=%.3f h=%.1f fullH=%.1f size=%.3f K=%.3f sat=%.1f sab=%.1f", G.T, G.milkLevel, G.h, G.fullH, G.bigCookieSize, Double(K), Layout.sat, Layout.sab))
-        }
     }
 }

@@ -656,6 +656,20 @@ enum RichText {
                 let p = v.split(separator: " ").map { RichText.length(String($0), relativeTo: 0) ?? 0 }
                 if p.count >= 2 { bx = p[0]; by = p[1] } else if p.count == 1 { bx = p[0] }
             }
+            if classes.contains("gardenSeedTiny") {
+                // transform:scale(0.5); margin:-20px -16px → a 24px picture taking 16px of the line
+                var sheet = "mgimg/gardenPlants.png"
+                if let bg = css["background-image"] ?? css["background"], let r = bg.range(of: "url(") {
+                    let rest = bg[r.upperBound...]
+                    if let e = rest.firstIndex(of: ")") { sheet = String(rest[..<e]).trimmingCharacters(in: CharacterSet(charactersIn: "'\" ")).components(separatedBy: "?")[0] }
+                }
+                var img = Res.sprite(sheet, x: -bx, y: -by, w: 48, h: 48)
+                if let o = css["opacity"].flatMap({ Double($0) }), let i = img {
+                    img = UIGraphicsImageRenderer(size: i.size).image { _ in i.draw(at: .zero, blendMode: .normal, alpha: CGFloat(o)) }
+                }
+                appendAttachment(img, w: 24, h: 24, kernBefore: -4, kernAfter: -4)
+                return
+            }
             if classes.contains("tinyHeavenly") {
                 appendAttachment(Res.image("img/heavenlyMoney.png"), w: 11.2, h: 11.2, kernBefore: 0.4, kernAfter: 0.4)
                 return

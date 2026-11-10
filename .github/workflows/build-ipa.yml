@@ -18,14 +18,14 @@ jobs:
         run: brew install xcodegen
 
       - name: Generate Xcode project
-        run: xcodegen generate
+        run: xcodegen generate --spec cookieswift-project.yml
 
       - name: Build app (unsigned)
         run: |
           set -o pipefail
           xcodebuild \
-            -project CookieClicker.xcodeproj \
-            -scheme CookieClicker \
+            -project CookieSwift.xcodeproj \
+            -scheme CookieSwift \
             -configuration Release \
             -sdk iphoneos \
             -destination 'generic/platform=iOS' \
@@ -52,4 +52,4 @@ jobs:
         run: |
           gh release create "build-${{ github.run_number }}" CookieClicker.ipa \
             --title "Cookie Clicker build ${{ github.run_number }}" \
-            --notes "Unsigned IPA. Install with Sideloadly or AltStore."
+            --notes "Unsigned IPA (all-Swift app). Install with Sideloadly or AltStore."
