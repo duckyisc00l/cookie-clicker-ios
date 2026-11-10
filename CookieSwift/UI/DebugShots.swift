@@ -13,6 +13,24 @@ enum DebugShots {
             for (n, l) in [("Farm", 5), ("Bank", 3), ("Temple", 3), ("Wizard tower", 3)] { if let b = G.buildingsBN[n], b.level < l { b.level = l } }
             Minigames.loadAll()
             Minigames.openWindow(["grimoire": "Wizard tower", "garden": "Farm", "market": "Bank", "pantheon": "Temple"][what]!)
+        case "gardenplay", "markettip", "pantheontip":
+            open(["gardenplay": "garden", "markettip": "market", "pantheontip": "pantheon"][what]!)
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                if what == "gardenplay", let M = Minigames.garden {
+                    for i in 0..<6 { M.plants[i].unlocked = true }
+                    M.getUnlockedN()
+                    M.plot[1][1] = [1, 40]; M.plot[1][2] = [2, 10]; M.plot[1][3] = [3, 30]; M.plot[2][1] = [4, 5]; M.plot[3][3] = [5, 60]
+                    M.seedSelected = 2
+                    M.computeBoostPlot(); M.computeEffs(); M.onRebuild?()
+                    MinigameWindow.current?.relayoutContent()
+                    MinigameWindow.current?.showTooltip { M.tileTooltip(1, 1) }
+                }
+                if what == "markettip", let M = Minigames.market { MinigameWindow.current?.showTooltip { M.goodTooltip(0) } }
+                if what == "pantheontip", let M = Minigames.pantheon {
+                    M.slotGod(M.gods[0], 0); M.slotGod(M.gods[3], 1); M.onSlotsChanged?()
+                    MinigameWindow.current?.showTooltip { (M.slotTooltip(0), nil) }
+                }
+            }
         case "toast": G.toast("Test toast", "Something happened", [10, 0])
         default: break
         }
