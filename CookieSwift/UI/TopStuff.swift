@@ -332,9 +332,11 @@ final class ToastsView: PassView {
         let id = pending
         pending += 1
         let delay = Double(id / 2) * 0.6 + (id % 2 == 0 ? 0 : 0.1)
+        DebugLog.log("toast \(title) id=\(id) delay=\(delay) frame=\(frame) seed=\(G.seed)")
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
-            if G.seed != oldSeed { self.pending -= 1; return }
+            if G.seed != oldSeed { DebugLog.log("toast dropped: seed"); self.pending -= 1; return }
+            DebugLog.log("toast shown \(title) bounds=\(self.bounds) hidden=\(self.isHidden) alpha=\(self.alpha) super=\(String(describing: self.superview?.isHidden))")
             if self.live.count > 5 { self.live.first?.removeFromSuperview(); self.live.removeFirst() }
             var t = "", tp = ""
             if !title.isEmpty { t = "<div style=\"\((reverse && icon != nil) ? "padding-left:8px;" : "")font-size:16px;font-family:Fancy;\">\(title)</div>" }
