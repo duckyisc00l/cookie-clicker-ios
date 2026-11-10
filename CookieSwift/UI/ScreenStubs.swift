@@ -1,7 +1,6 @@
 import UIKit
 
 // Temporary stand-ins while the screens are being ported.
-final class StatsScreen: GameScreen { init() { super.init(name: "stats") } }
 final class MiscScreen: GameScreen { init() { super.init(name: "misc") } }
 final class AscendView {
     let options: PopupOptions
