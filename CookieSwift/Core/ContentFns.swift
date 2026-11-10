@@ -188,34 +188,46 @@ enum ContentFns {
     }()
 
     /// effect functions (eff[1] when eff[2]==2)
-    static let effs: [String: (Double) -> Double] = [
+    static let effs: [String: (Double) -> Double] = {
+        var d: [String: (Double) -> Double] = [:]
         // v=>{return v*(1+0.03*G.santaLevel);}
-        "Upgrade:Santa's legacy.effs.0.1": { v in v * (1 + 0.03 * Double(G.santaLevel)) },
+        d["Upgrade:Santa's legacy.effs.0.1"] = { v in v * (1 + 0.03 * Double(G.santaLevel)) }
+
         // v=>{ var day=Math.floor((Date.now()-G.runStart)/1000/10)*10/60/60/24; day=Math.max(0,Math.min(day,100)); var n=(1-Math.pow(1-day/100,3))*0.1; return v*(1+n); }
-        "Upgrade:Century egg.effs.0.1": { v in
+        d["Upgrade:Century egg.effs.0.1"] = { v in
             var day = ((nowMs() - G.runStart) / 1000 / 10).rounded(.down) * 10 / 60 / 60 / 24
             day = max(0, min(day, 100))
             let n = (1 - pow(1 - day / 100, 3)) * 0.1
             return v * (1 + n)
-        },
+        }
+
         // v=>{return v+(1+0.02*G.buildings[1].amount);}
-        "Upgrade:One mind.effs.0.1": { v in v + (1 + 0.02 * Double(G.buildings[1].amount)) },
-        "Upgrade:Communal brainsweep.effs.0.1": { v in v + (1 + 0.02 * Double(G.buildings[1].amount)) },
+        d["Upgrade:One mind.effs.0.1"] = { v in v + (1 + 0.02 * Double(G.buildings[1].amount)) }
+
+        d["Upgrade:Communal brainsweep.effs.0.1"] = { v in v + (1 + 0.02 * Double(G.buildings[1].amount)) }
+
         // v=>{return v+(1+0.05*G.buildings[10].amount);}
-        "Upgrade:Elder Pact.effs.0.1": { v in v + (1 + 0.05 * Double(G.buildings[10].amount)) },
+        d["Upgrade:Elder Pact.effs.0.1"] = { v in v + (1 + 0.05 * Double(G.buildings[10].amount)) }
+
         // v=>{return v*(1+(G.season=='easter'?0.02:0));}
-        "Upgrade:Starspawn.effs.0.1": { v in v * (1 + (G.season == "easter" ? 0.02 : 0)) },
-        "Upgrade:Starterror.effs.0.1": { v in v * (1 + (G.season == "halloween" ? 0.02 : 0)) },
-        "Upgrade:Starlove.effs.0.1": { v in v * (1 + (G.season == "valentines" ? 0.02 : 0)) },
+        d["Upgrade:Starspawn.effs.0.1"] = { v in v * (1 + (G.season == "easter" ? 0.02 : 0)) }
+
+        d["Upgrade:Starterror.effs.0.1"] = { v in v * (1 + (G.season == "halloween" ? 0.02 : 0)) }
+
+        d["Upgrade:Starlove.effs.0.1"] = { v in v * (1 + (G.season == "valentines" ? 0.02 : 0)) }
+
         // v=>{return v*(1+(G.season=='fools'?0.05:0));}
-        "Upgrade:Startrade.effs.0.1": { v in v * (1 + (G.season == "fools" ? 0.05 : 0)) },
+        d["Upgrade:Startrade.effs.0.1"] = { v in v * (1 + (G.season == "fools" ? 0.05 : 0)) }
+
         // v=>{return v*(1+0.5+0.1*(G.Has('Residual luck')?G.goldenCookieUpgrades.filter(me=>me.owned).length:0));}
-        "Upgrade:Golden switch [off].effs.0.1": { v in
+        d["Upgrade:Golden switch [off].effs.0.1"] = { v in
             v * (1 + 0.5 + 0.1 * (G.Has("Residual luck") ? Double(G.goldenCookieUpgrades.filter { $0.owned != 0 }.count) : 0))
-        },
+        }
+
         // v=>{return v*Math.pow(0.99,G.buildings[0].amount/100);}
-        "Upgrade:Five-finger discount.effs.0.1": { v in v * pow(0.99, Double(G.buildings[0].amount) / 100) },
-    ]
+        d["Upgrade:Five-finger discount.effs.0.1"] = { v in v * pow(0.99, Double(G.buildings[0].amount) / 100) }
+        return d
+    }()
 
     /// power:()=>... (heart biscuits)
     static let powers: [String: () -> Double] = {
@@ -248,29 +260,35 @@ enum ContentFns {
     }()
 
     /// func: called when bought (or, for heavenly upgrades, after every ascension)
-    static let funcs: [String: (Upgrade, Bool) -> Void] = [
+    static let funcs: [String: (Upgrade, Bool) -> Void] = {
+        var d: [String: (Upgrade, Bool) -> Void] = [:]
         // function(){ var drop=choose(G.santaDrops); G.unlock(drop); G.toast(`In the festive hat, you find...`,`a festive test tube<br>and <b>`+drop+`</b>.`,G.upgradesBN[drop].icon,1); G.pingScreen('special'); }
-        "Upgrade:A festive hat.func": { _, _ in
+        d["Upgrade:A festive hat.func"] = { _, _ in
             let drop = choose(Game.santaDrops)
             G.unlock(drop)
             G.toast("In the festive hat, you find...", "a festive test tube<br>and <b>" + drop + "</b>.", G.upgradesBN[drop]!.icon, true)
             G.pingScreen("special")
-        },
+        }
+
         // function(){G.pingScreen('special');}
-        "Upgrade:A crumbly egg.func": { _, _ in G.pingScreen("special") },
+        d["Upgrade:A crumbly egg.func"] = { _, _ in G.pingScreen("special") }
+
         // (me)=>{ var cookies=G.cookies*0.05; G.toast(`Chocolate egg`,`The egg bursts into <b>${B(cookies)}</b> cookies!`,me.icon,true); G.Earn(cookies); }
-        "Upgrade:Chocolate egg.func": { me, _ in
+        d["Upgrade:Chocolate egg.func"] = { me, _ in
             let c = G.cookies * 0.05
             G.toast("Chocolate egg", "The egg bursts into <b>\(B(c))</b> cookies!", me.icon, true)
             G.earn(c)
-        },
+        }
+
         // e=>{G.pingScreen('special');}
-        "Upgrade:Bingo center/Research facility.func": { _, _ in G.pingScreen("special") },
+        d["Upgrade:Bingo center/Research facility.func"] = { _, _ in G.pingScreen("special") }
+
         // (me)=>{G.unlock('Elder Pledge');}
-        "Upgrade:Elder Pact.func": { _, _ in G.unlock("Elder Pledge") },
+        d["Upgrade:Elder Pact.func"] = { _, _ in G.unlock("Elder Pledge") }
+
         // (me)=>{ G.elderWrath=0; G.collectWrinklers(); G.pledges++; G.win('Elder nap'); if (G.pledges>=5) G.win('Elder slumber');
         //   G.pledgeT=Date.now()+G.getPledgeDuration()*1000; G.unlock('Elder Covenant'); me.owned=0; G.toast(me.name,'Grandmatriarchs appeased.',me.icon,true); }
-        "Upgrade:Elder Pledge.func": { me, _ in
+        d["Upgrade:Elder Pledge.func"] = { me, _ in
             G.elderWrath = 0
             G.collectWrinklers()
             G.pledges += 1
@@ -280,52 +298,66 @@ enum ContentFns {
             G.unlock("Elder Covenant")
             me.owned = 0
             G.toast(me.name, "Grandmatriarchs appeased.", me.icon, true)
-        },
+        }
+
         // (me)=>{ G.elderWrath=0; G.collectWrinklers(); G.pledgeT=0; G.win('Elder calm'); G.toggleOff('Elder Covenant');G.toggleOn('Revoke Elder Covenant'); G.toast(me.name,'Grandmapocalypse ended.',me.icon,true); }
-        "Upgrade:Elder Covenant.func": { me, _ in
+        d["Upgrade:Elder Covenant.func"] = { me, _ in
             G.elderWrath = 0
             G.collectWrinklers()
             G.pledgeT = 0
             G.win("Elder calm")
             G.toggleOff("Elder Covenant"); G.toggleOn("Revoke Elder Covenant")
             G.toast(me.name, "Grandmapocalypse ended.", me.icon, true)
-        },
+        }
+
         // (me)=>{ G.toggleOff('Revoke Elder Covenant');G.toggleOn('Elder Covenant'); G.toast(me.name,'Covenant has been revoked...',me.icon,true); }
-        "Upgrade:Revoke Elder Covenant.func": { me, _ in
+        d["Upgrade:Revoke Elder Covenant.func"] = { me, _ in
             G.toggleOff("Revoke Elder Covenant"); G.toggleOn("Elder Covenant")
             G.toast(me.name, "Covenant has been revoked...", me.icon, true)
-        },
-        // (me)=>{ for (var i in G.seasons){G.seasons[i].triggerUpgrade.unlock();} }
-        "Upgrade:Season switcher.func": { _, _ in for s in G.seasonsList { s.triggerUpgrade.unlock() } },
-        // (me)=>{G.unlock('Golden switch [off]');}
-        "Upgrade:Golden switch.func": { _, _ in G.unlock("Golden switch [off]") },
-        // (me)=>{ G.toggleOff('Golden switch [off]');G.toggleOn('Golden switch [on]'); }
-        "Upgrade:Golden switch [off].func": { _, _ in G.toggleOff("Golden switch [off]"); G.toggleOn("Golden switch [on]") },
-        // (me)=>{ G.toggleOff('Golden switch [on]');G.toggleOn('Golden switch [off]'); }
-        "Upgrade:Golden switch [on].func": { _, _ in G.toggleOff("Golden switch [on]"); G.toggleOn("Golden switch [off]") },
-    ]
+        }
 
-    static let upgradeTexts: [String: (Upgrade) -> String] = [
+        // (me)=>{ for (var i in G.seasons){G.seasons[i].triggerUpgrade.unlock();} }
+        d["Upgrade:Season switcher.func"] = { _, _ in for s in G.seasonsList { s.triggerUpgrade.unlock() } }
+
+        // (me)=>{G.unlock('Golden switch [off]');}
+        d["Upgrade:Golden switch.func"] = { _, _ in G.unlock("Golden switch [off]") }
+
+        // (me)=>{ G.toggleOff('Golden switch [off]');G.toggleOn('Golden switch [on]'); }
+        d["Upgrade:Golden switch [off].func"] = { _, _ in G.toggleOff("Golden switch [off]"); G.toggleOn("Golden switch [on]") }
+
+        // (me)=>{ G.toggleOff('Golden switch [on]');G.toggleOn('Golden switch [off]'); }
+        d["Upgrade:Golden switch [on].func"] = { _, _ in G.toggleOff("Golden switch [on]"); G.toggleOn("Golden switch [off]") }
+        return d
+    }()
+
+    static let upgradeTexts: [String: (Upgrade) -> String] = {
+        var d: [String: (Upgrade) -> String] = [:]
         // me=>{ return `Current boost: <b>+${B((me.getComputedEff('cpsM',1)-1)*100,1)}%</b>`; }
-        "Upgrade:Century egg.preDescFunc": { me in "Current boost: <b>+\(B((me.getComputedEff("cpsM", 1) - 1) * 100, 1))%</b>" },
+        d["Upgrade:Century egg.preDescFunc"] = { me in "Current boost: <b>+\(B((me.getComputedEff("cpsM", 1) - 1) * 100, 1))%</b>" }
+
         // me=>{ Math.seedrandom(G.seed+'-blasphemouse'); if (Math.random()<0.3) {...`Absolutely blasphemouse!`} else {`Absolutely blasphemous!`} }
-        "Upgrade:Mice clicking mice.qFunc": { _ in
+        d["Upgrade:Mice clicking mice.qFunc"] = { _ in
             JSMath.seedrandom(G.seed + "-blasphemouse")
             let r = JSMath.random() < 0.3
             JSMath.seedrandom()
             return r ? "Absolutely blasphemouse!" : "Absolutely blasphemous!"
-        },
-        "Upgrade:Tombola computing.qFunc": { _ in tombola() },
-    ]
+        }
 
-    static let achievTexts: [String: (Achiev) -> String] = [
+        d["Upgrade:Tombola computing.qFunc"] = { _ in tombola() }
+        return d
+    }()
+
+    static let achievTexts: [String: (Achiev) -> String] = {
+        var d: [String: (Achiev) -> String] = [:]
         // me=>{ (moves the #parade element) return me.desc; }
-        "Achiev:Cookie Clicker.descFunc": { me in me.desc },
+        d["Achiev:Cookie Clicker.descFunc"] = { me in me.desc }
+
         // me=>{ let x=G.T; return `Everyone's here.<span id="parade" style="...background:url(img/parade.png) -${x}px ${G.T%20<10?0:32}px;..."></span>...Won't you have some cookies too?`; }
-        "Achiev:Cookie Clicker.qFunc": { _ in
+        d["Achiev:Cookie Clicker.qFunc"] = { _ in
             "Everyone's here.<span id=\"parade\" style=\"position:absolute;left:-11px;right:-11px;height:32px;background:url(img/parade.png) -\(G.T)px \(G.T % 20 < 10 ? 0 : 32)px;display:block;\"></span><span style=\"margin-bottom:32px;display:block;\"></span>Won't you have some cookies too?"
-        },
-    ]
+        }
+        return d
+    }()
 
     /// Tombola computing's flavor text. The original has two bugs (`choose[...]` instead of `choose([...])`),
     /// which print "undefined"; kept as is.
