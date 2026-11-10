@@ -67,7 +67,7 @@ final class GameViewController: UIViewController {
         G._Logic(delta)
         root.draw()
         if G.T % 150 == 0, ProcessInfo.processInfo.environment["CC_SHOT"] != nil {
-            NSLog("[cc] T=%d milk=%.3f h=%.1f fullH=%.1f size=%.3f K=%.3f sat=%.1f sab=%.1f", G.T, G.milkLevel, G.h, G.fullH, G.bigCookieSize, Double(K), Layout.sat, Layout.sab)
+            DebugLog.log(String(format: "T=%d milk=%.3f h=%.1f fullH=%.1f size=%.3f K=%.3f sat=%.1f sab=%.1f", G.T, G.milkLevel, G.h, G.fullH, G.bigCookieSize, Double(K), Layout.sat, Layout.sab))
         }
     }
 }

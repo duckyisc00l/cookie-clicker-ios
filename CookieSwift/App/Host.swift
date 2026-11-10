@@ -60,7 +60,7 @@ final class ExtrasHost: GameHost {
         UIApplication.shared.isIdleTimerDisabled = s.keepAwake
         GameLoop.highRefresh = s.highRefresh
         if !s.liveActivity { LiveActivityManager.shared.endAll() }
-        GameNotifications.shared.askPermissionIfNeeded()
+        if !DebugLog.enabled { GameNotifications.shared.askPermissionIfNeeded() }
     }
 
     func currentSave(_ completion: @escaping (String?, String?, String?) -> Void) {

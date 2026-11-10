@@ -112,6 +112,7 @@ final class OrteilView: TapView {
             }
         }
         bubbleText.html = text
+        DebugLog.log("talk \(text) bounds=\(bounds) bubble=\(bubble.frame) img=\(bubble.image != nil)")
         layoutBubbleText()
         bubble.alpha = 1
         // bubbleAppearFromLeft

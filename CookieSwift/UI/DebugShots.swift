@@ -13,3 +13,15 @@ enum DebugShots {
         }
     }
 }
+
+/// a log file the test machine copies out next to the screenshots
+enum DebugLog {
+    static let enabled = ProcessInfo.processInfo.environment["CC_SHOT"] != nil
+    static func log(_ s: String) {
+        guard enabled else { return }
+        let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0].appendingPathComponent("debug.txt")
+        let line = "[\(ProcessInfo.processInfo.environment["CC_SHOT"] ?? "")] \(s)\n"
+        if let h = try? FileHandle(forWritingTo: url) { h.seekToEndOfFile(); h.write(Data(line.utf8)); try? h.close() }
+        else { try? Data(line.utf8).write(to: url) }
+    }
+}
