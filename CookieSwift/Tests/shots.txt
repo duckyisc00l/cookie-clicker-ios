@@ -1,1 +1,1 @@
-cookie store upgrades popup-building popup-upgrade
+cookie store special popup-building
