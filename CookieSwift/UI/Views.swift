@@ -328,6 +328,9 @@ final class StateButton: TapView {
         addSubview(shade); addSubview(bevel)
         label.html = text
         label.style.shadow = Shadows.body
+        label.style.bold = true; label.style.align = .center
+        stateL.style.bold = true
+        self.comment.style.bold = true; self.comment.style.align = .center
         stateL.style.shadow = Shadows.body
         stateL.style.align = .center
         addSubview(label); addSubview(stateL)

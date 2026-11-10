@@ -435,17 +435,20 @@ extension Game {
         Minigames.setup()
         resetPools()
         for s in screenNames { screenPing[s] = false }
-        // reset, then load from the save (or the backup)
+        reloadFromSave()
+    }
+    /// reset, then load from the save (or the backup)
+    func reloadFromSave() {
         Reset(true)
         var toToast: (String, String)? = nil
         switch SaveStore.load(SaveStore.savePath) {
-        case .loaded(let o): LoadFromObject(o)
+        case .loaded(let o): _ = LoadFromObject(o)
         case .none: Reset(true)
         case .error:
             toToast = ("Failed to load save.", "Restoring backup...")
             Reset(true)
             switch SaveStore.load(SaveStore.savePathPrev) {
-            case .loaded(let o): LoadFromObject(o); toToast = ("Failed to load save.", "Restored from backup instead.")
+            case .loaded(let o): _ = LoadFromObject(o); toToast = ("Failed to load save.", "Restored from backup instead.")
             default: toToast = ("Failed to load save or backup.", "Starting new save."); Reset(true)
             }
         }

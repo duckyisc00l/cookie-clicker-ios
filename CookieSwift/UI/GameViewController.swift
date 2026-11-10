@@ -27,6 +27,7 @@ final class GameViewController: UIViewController {
             started = true
             G.Init()
             root.build()
+            ExtrasHost.shared.start()
             // screenshots on the test machine: open a given screen
             if let shot = ProcessInfo.processInfo.environment["CC_SHOT"] {
                 if shot == "upgrades" { G.onStoreSection = "upgrades"; G.setScreen("store") }

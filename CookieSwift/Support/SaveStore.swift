@@ -3,8 +3,8 @@ import Foundation
 /// The save files (FS in www/lib/main.js). They're the same JSON text files the previous version of the app
 /// kept in Application Support/Saves, so your current save carries over.
 enum SaveStore {
-    static let savePath = "CookieClickerSave.txt"
-    static let savePathPrev = "CookieClickerSavePrev.txt"
+    static var savePath: String { isTest ? "CookieClickerSaveTest.txt" : "CookieClickerSave.txt" }
+    static var savePathPrev: String { isTest ? "CookieClickerSaveTestPrev.txt" : "CookieClickerSavePrev.txt" }
 
     enum Result { case loaded([String: Any]), none, error }
 

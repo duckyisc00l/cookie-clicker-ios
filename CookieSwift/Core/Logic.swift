@@ -65,6 +65,7 @@ extension Game {
     }
 
     // MARK: G.Save
+    @discardableResult
     func Save(toObj: Bool = false) -> [String: Any] {
         var o: [String: Any] = [:]
         o["time"] = nowMs()

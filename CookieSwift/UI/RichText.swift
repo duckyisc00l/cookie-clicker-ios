@@ -726,7 +726,7 @@ final class RichLabel: UIView {
     private func textKit(_ t: NSAttributedString, width: CGFloat) -> (NSLayoutManager, NSTextContainer) {
         let storage = NSTextStorage(attributedString: t)
         let lm = NSLayoutManager()
-        let tc = NSTextContainer(size: CGSize(width: width, height: .greatestFiniteMagnitude))
+        let tc = NSTextContainer(size: CGSize(width: width, height: 100000))
         tc.lineFragmentPadding = 0
         tc.exclusionPaths = exclusions.map { UIBezierPath(rect: CGRect(x: px($0.minX), y: px($0.minY), width: px($0.width), height: px($0.height))) }
         lm.addTextContainer(tc)
