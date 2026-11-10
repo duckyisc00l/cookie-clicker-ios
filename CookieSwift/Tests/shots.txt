@@ -1,1 +1,1 @@
-popup-pantheon popup-grimoire
+popup-market popup-pantheon

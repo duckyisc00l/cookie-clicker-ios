@@ -89,6 +89,7 @@ enum Minigames {
         loaded[buildingName] = m
         m.reset(true)
         if !b.minigameSave.isEmpty { m.reset(true); m.load(b.minigameSave) }
+        else if let mk = m as? Market { mk.graphCols = 1; mk.toRedraw = 2 }  // shim.js: new markets get the dark graph
         G.refreshCps = true
     }
     static func loadAll() { for n in order { load(n) } }

@@ -9,19 +9,9 @@ final class Garden: Minigame {
     func load(_ str: String) {}
     func logic() {}
 }
-final class Market: Minigame {
-    let parent: Building; let name = "Stock Market"
-    init(_ b: Building) { parent = b }
-    func reset(_ hard: Bool) {}
-    func save() -> String { parent.minigameSave }
-    func load(_ str: String) {}
-    func logic() {}
-    func takeLoan(_ n: Int, interest: Bool) {}
-}
 /// placeholder screens until each minigame is ported
 class PlaceholderScreen: UIView, MinigameScreen {
     func layoutContent(width: Double, minHeight: Double) -> Double { minHeight }
     func drawFrame() {}
 }
 final class GardenScreen: PlaceholderScreen { init(_ m: Garden) { super.init(frame: .zero) }; required init?(coder: NSCoder) { fatalError() } }
-final class MarketScreen: PlaceholderScreen { init(_ m: Market) { super.init(frame: .zero) }; required init?(coder: NSCoder) { fatalError() } }

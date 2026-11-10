@@ -299,28 +299,22 @@ final class PantheonScreen: UIView, MinigameScreen {
     required init?(coder: NSCoder) { fatalError() }
 
     func layoutContent(width w: Double, minHeight: Double) -> Double {
-        // #templeContent padding 8px 4px 16px; slots in a centred row (tops -4/0/+4px)
-        var y = 8.0 + 4
+        // measured from the page: slots at y 15 (-4/0/+4), the info pill at 106, the roster from 145 every 82
         let sx = (w - 3 * 66) / 2
         slotFrames = []
         for (i, s) in slotViews.enumerated() {
-            let f = CGRect(x: px(sx + Double(i) * 66 + 3), y: px(y + [-4.0, 0, 4][i]), width: px(60), height: px(74))
+            let f = CGRect(x: px(sx + Double(i) * 66 + 3), y: px(15 + [-4.0, 0, 4][i]), width: px(60), height: px(74))
             s.frame = f
             s.viewWithTag(1)?.frame = s.bounds
             s.viewWithTag(2)?.frame = CGRect(x: px(18), y: px(74 - 8 - 24), width: px(24), height: px(24))
             slotFrames.append(f)
         }
-        y += 74 + 4
-        // #templeInfo: a dark pill
-        let iw = 190.0
-        info.frame = CGRect(x: px((w - iw) / 2), y: px(y + 8), width: px(iw), height: px(30))
-        info.layer.cornerRadius = px(15)
-        infoText.frame = CGRect(x: px(32), y: px(8), width: px(iw - 48), height: px(14))
+        let iw = 154.7
+        info.frame = CGRect(x: px((w - iw) / 2), y: px(106), width: px(iw), height: px(28))
+        info.layer.cornerRadius = px(14)
+        infoText.frame = CGRect(x: px(32), y: px(8), width: px(iw - 48), height: px(12))
         refillB.frame = CGRect(x: info.frame.minX - px(6), y: info.frame.minY - px(10), width: px(48), height: px(48))
         refillB.subviews.first?.center = CGPoint(x: px(24), y: px(24))
-        y += 8 + 30
-        // #templeGods: the roster, 4 to a row
-        y += 8
         let perRow = max(1, Int((w - 8) / 66))
         let n = godViews.count
         rosterFrames = []
@@ -328,9 +322,9 @@ final class PantheonScreen: UIView, MinigameScreen {
             let row = i / perRow
             let inRow = min(perRow, n - row * perRow)
             let x0 = (w - Double(inRow) * 66) / 2
-            rosterFrames.append(CGRect(x: px(x0 + Double(i % perRow) * 66 + 3), y: px(y + Double(row) * 80 + 3), width: px(60), height: px(74)))
+            rosterFrames.append(CGRect(x: px(x0 + Double(i % perRow) * 66 + 3), y: px(145 + Double(row) * 82), width: px(60), height: px(74)))
         }
-        y += Double((n + perRow - 1) / perRow) * 80 + 8 + 16
+        let y = 134 + 8 + Double((n + perRow - 1) / perRow) * 82 + 8 + 16
         let h = max(y, minHeight)
         bg.frame = CGRect(x: 0, y: 0, width: px(w), height: px(h))
         borders.frame = bg.frame
@@ -386,6 +380,7 @@ final class PantheonScreen: UIView, MinigameScreen {
                 let W = Double(bounds.width / K)
                 info.frame = CGRect(x: px((W - iw) / 2), y: info.frame.minY, width: px(iw), height: px(th + 16))
                 info.layer.cornerRadius = px(min(16, (th + 16) / 2))
+                _ = W
                 infoText.frame = CGRect(x: px(32), y: px(8), width: px(tw), height: px(th))
                 refillB.frame.origin = CGPoint(x: info.frame.minX - px(6), y: info.frame.minY - px(10))
             }
