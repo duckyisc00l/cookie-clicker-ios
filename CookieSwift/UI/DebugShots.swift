@@ -31,27 +31,7 @@ enum DebugShots {
                     MinigameWindow.current?.showTooltip { (M.slotTooltip(0), M.slotIcon(0)) }
                 }
             }
-        case "toast":
-            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
-                guard let w = UIApplication.shared.connectedScenes.compactMap({ ($0 as? UIWindowScene)?.windows.first }).first else { return }
-                func dump(_ v: UIView, _ d: Int) {
-                    if d > 3 { return }
-                    DebugLog.log(String(repeating: "  ", count: d) + "\(type(of: v)) f=\(v.frame) a=\(v.alpha) h=\(v.isHidden) bg=\(String(describing: v.backgroundColor)) clip=\(v.clipsToBounds) n=\(v.subviews.count)")
-                    for c in v.subviews { dump(c, d + 1) }
-                }
-                dump(w, 0)
-                let red = UIView(frame: CGRect(x: 40, y: 300, width: 100, height: 100)); red.backgroundColor = .red
-                guard let tv = (UIEvents.shared.ui as? RootView)?.top.toasts else { return }
-                tv.addSubview(red)
-                let t = ToastView(body: "<div>Static toast test</div>", icon: [15, 9], width: 300)
-                t.frame = CGRect(x: px(16), y: px(150), width: px(300), height: px(t.cssHeight))
-                t.alpha = 1
-                tv.addSubview(t)
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                    for v in tv.subviews { DebugLog.log("tv sub \(type(of: v)) f=\(v.frame) a=\(v.alpha) op=\(v.layer.opacity) pres=\(String(describing: v.layer.presentation()?.opacity)) tr=\(v.transform) h=\(v.isHidden) anims=\(v.layer.animationKeys() ?? [])") }
-                }
-            }
-            for i in 0..<8 { DispatchQueue.main.asyncAfter(deadline: .now() + 1 + Double(i) * 1.5) { G.toast("Garden: ready!", "<b>Baker's wheat</b> is now mature.", [15, 9]) } }
+        case "toast": for i in 0..<8 { DispatchQueue.main.asyncAfter(deadline: .now() + 1 + Double(i) * 1.5) { G.toast("Garden: ready!", "<b>Baker's wheat</b> is now mature.", [15, 9]) } }
         default: break
         }
     }

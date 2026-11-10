@@ -139,6 +139,7 @@ final class RootView: UIView, GameUI {
             current?.draw()
         }
         sparkles.draw()
+        top.toasts.tick()
         top.popups.tick()
         Minigames.drawShown()
     }

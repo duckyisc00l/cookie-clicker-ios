@@ -350,9 +350,9 @@ final class ToastsView: PassView {
             v.frame = CGRect(x: px(16), y: self.bounds.height - px(h), width: self.bounds.width - px(32), height: px(h))
             self.addSubview(v)
             self.live.append(v)
-            v.run(rise: id % 2 == 0 ? 64 : 112)
-            DebugLog.log("toast v=\(v.frame) h=\(h) win=\(v.convert(v.bounds, to: nil)) inWindow=\(v.window != nil) subs=\(v.subviews.map { "\(type(of: $0)) \($0.frame)" }) siblings=\(self.superview?.subviews.map { "\(type(of: $0)) a=\($0.alpha) h=\($0.isHidden)" } ?? [])")
-            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { DebugLog.log("toast +1s alpha=\(v.alpha) pres=\(String(describing: v.layer.presentation()?.opacity)) frame=\(v.frame)") }
+            v.rise = id % 2 == 0 ? 64 : 112
+            v.born = nowMs()
+            v.step()
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                 v.removeFromSuperview()
                 self?.live.removeAll { $0 === v }
@@ -361,6 +361,8 @@ final class ToastsView: PassView {
         }
     }
     func closeAll() { live.forEach { $0.removeFromSuperview() }; live = [] }
+    /// moved by the game loop (the toast1/toast2 keyframes)
+    func tick() { for v in live { (v as? ToastView)?.step() } }
 }
 
 final class ToastView: UIView {
@@ -405,13 +407,19 @@ final class ToastView: UIView {
     }
     required init?(coder: NSCoder) { fatalError() }
     /// .toast1 / .toast2: rise 64px (or 112px) and fade in over 0.6s, stay, fade out at the end of 3s
-    func run(rise: Double) {
-        let up = CGAffineTransform(translationX: 0, y: -px(rise))
-        UIView.animate(withDuration: 0.6, delay: 0, options: [.curveEaseOut, .allowUserInteraction]) {
-            self.alpha = 1; self.transform = up
-        } completion: { _ in
-            UIView.animate(withDuration: 0.6, delay: 1.8, options: [.curveEaseOut]) { self.alpha = 0 }
-        }
+    var rise = 64.0
+    var born = 0.0
+    /// .toast1/.toast2: 3s ease-out; 0-20% rise and fade in, 80-100% fade out
+    func step() {
+        let t = min(1, max(0, (nowMs() - born) / 3000))
+        func ease(_ x: Double) -> Double { 1 - (1 - x) * (1 - x) }
+        var y = 0.0, o = 1.0
+        if t < 0.2 { let k = ease(t / 0.2); y = rise * k; o = k }
+        else if t < 0.8 { y = rise }
+        else { y = rise; o = 1 - ease((t - 0.8) / 0.2) }
+        transform = CGAffineTransform(translationX: 0, y: -px(y))
+        alpha = CGFloat(o)
     }
+
 
 }
