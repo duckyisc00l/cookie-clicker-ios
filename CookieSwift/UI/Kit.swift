@@ -76,6 +76,8 @@ enum Res {
               let o = try? JSONSerialization.jsonObject(with: d) as? [String: [Double]] else { return [:] }
         return o
     }()
+    /// the only sharper picture kept: the big cookie
+    private static let hdKept: Set<String> = ["perfectCookie.png"]
     /// The app's own versions of some pictures (new buildings and icons) replace the game's.
     private static let overrides: Set<String> = ["img/icons.png", "img/buildings.png"]
 
@@ -86,7 +88,7 @@ enum Res {
         let file = (path as NSString).lastPathComponent
         let base = (file as NSString).deletingPathExtension
         var img: UIImage? = nil
-        if let size = hdManifest[file], let u = url("hd/\(base).webp"), let data = try? Data(contentsOf: u), let raw = UIImage(data: data), let cg = raw.cgImage {
+        if hdKept.contains(file), let size = hdManifest[file], let u = url("hd/\(base).webp"), let data = try? Data(contentsOf: u), let raw = UIImage(data: data), let cg = raw.cgImage {
             let scale = CGFloat(cg.width) / CGFloat(size[0])
             img = UIImage(cgImage: cg, scale: scale, orientation: .up)
         }

@@ -28,7 +28,10 @@ targets:
           mkdir -p "$DEST/override"
           rsync -a --delete "$SRC/www/img/" "$DEST/img/"
           rsync -a --delete "$SRC/www/snd/" "$DEST/snd/"
-          rsync -a --delete "$SRC/hd/" "$DEST/hd/"
+          # only the sharper big cookie; every other picture is the game's own
+          mkdir -p "$DEST/hd"
+          rm -f "$DEST/hd/"*.webp
+          cp "$SRC/hd/manifest.json" "$SRC/hd/perfectCookie.webp" "$DEST/hd/"
           rsync -a --delete "$SRC/mods/minigames/img/" "$DEST/mgimg/"
           cp "$SRC/mods/icons.png" "$SRC/mods/buildings.png" "$DEST/override/"
     dependencies:

@@ -31,6 +31,12 @@ enum DebugShots {
                     MinigameWindow.current?.showTooltip { (M.slotTooltip(0), M.slotIcon(0)) }
                 }
             }
+        case "cookiepress":
+            // hold a finger near the cookie's top-right edge
+            Timer.scheduledTimer(withTimeInterval: 0.2, repeats: true) { _ in
+                G.onX = G.w / 2 + 90; G.onY = G.h / 2 - 70
+                if G.bigCookieState != 1 { G.clickBigCookie(x: G.onX, y: G.onY) }
+            }
         case "toast": for i in 0..<8 { DispatchQueue.main.asyncAfter(deadline: .now() + 1 + Double(i) * 1.5) { G.toast("Garden: ready!", "<b>Baker's wheat</b> is now mature.", [15, 9]) } }
         default: break
         }

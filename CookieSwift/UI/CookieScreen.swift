@@ -8,6 +8,8 @@ final class CookieScreen: GameScreen {
     private let container = PassView()
     private let bigCookie = BigCookieTouch()
     private let cookieLayer = CALayer()
+    /// flat layers holding the tilted shadow and cookie apart, so the two tilted pictures never cut through each other
+    private let shadowHost = CALayer(), cookieHost = CALayer()
     private var shadowLayer: CALayer?
     private var shine: UIView?
     private var cursorRing: UIImageView?
@@ -71,7 +73,9 @@ final class CookieScreen: GameScreen {
             sh.bounds = CGRect(x: 0, y: 0, width: px(240), height: px(240))
             sh.position = center
             sh.cornerRadius = px(120)
-            container.layer.addSublayer(sh)
+            shadowHost.frame = container.bounds
+            shadowHost.addSublayer(sh)
+            container.layer.addSublayer(shadowHost)
             shadowLayer = sh
         }
         // #bigCookie
@@ -80,7 +84,9 @@ final class CookieScreen: GameScreen {
         cookieLayer.bounds = CGRect(x: 0, y: 0, width: px(240), height: px(240))
         cookieLayer.position = center
         cookieLayer.transform = CATransform3DIdentity
-        container.layer.addSublayer(cookieLayer)
+        cookieHost.frame = container.bounds
+        cookieHost.addSublayer(cookieLayer)
+        container.layer.addSublayer(cookieHost)
         bigCookie.frame = CGRect(x: 0, y: 0, width: px(240), height: px(240))
         bigCookie.center = center
         bigCookie.onDown = { [weak self] v, p in
@@ -127,6 +133,7 @@ final class CookieScreen: GameScreen {
         quickBox = nil
         shine = nil; cursorRing = nil; shadowLayer?.removeFromSuperlayer(); shadowLayer = nil
         cookieLayer.removeFromSuperlayer()
+        shadowHost.removeFromSuperlayer(); cookieHost.removeFromSuperlayer()
         (view.superview?.superview as? RootView)?.setMilkOnTop(false)
         (view.superview?.superview as? RootView)?.setBackScale(1)
         (view.superview?.superview as? RootView)?.rain.extraScale = 1.1
