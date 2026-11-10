@@ -332,11 +332,9 @@ final class ToastsView: PassView {
         let id = pending
         pending += 1
         let delay = Double(id / 2) * 0.6 + (id % 2 == 0 ? 0 : 0.1)
-        DebugLog.log("toast \(title) id=\(id) delay=\(delay) frame=\(frame) seed=\(G.seed)")
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
-            if G.seed != oldSeed { DebugLog.log("toast dropped: seed"); self.pending -= 1; return }
-            DebugLog.log("toast shown \(nowMs()) \(title) bounds=\(self.bounds) hidden=\(self.isHidden) alpha=\(self.alpha) super=\(String(describing: self.superview?.isHidden))")
+            if G.seed != oldSeed { self.pending -= 1; return }
             if self.live.count > 5 { self.live.first?.removeFromSuperview(); self.live.removeFirst() }
             var t = "", tp = ""
             if !title.isEmpty { t = "<div style=\"\((reverse && icon != nil) ? "padding-left:8px;" : "")font-size:16px;font-family:Fancy;\">\(title)</div>" }
@@ -406,18 +404,12 @@ final class ToastView: UIView {
     required init?(coder: NSCoder) { fatalError() }
     /// .toast1 / .toast2: rise 64px (or 112px) and fade in over 0.6s, stay, fade out at the end of 3s
     func run(rise: Double) {
-        let a = CAKeyframeAnimation(keyPath: "transform.translation.y")
-        a.values = [0, -px(rise), -px(rise), -px(rise)]
-        a.keyTimes = [0, 0.2, 0.8, 1]
-        let o = CAKeyframeAnimation(keyPath: "opacity")
-        o.values = [0, 1, 1, 0]
-        o.keyTimes = [0, 0.2, 0.8, 1]
-        let g = CAAnimationGroup()
-        g.animations = [a, o]
-        g.duration = 3
-        g.timingFunction = CAMediaTimingFunction(name: .easeOut)
-        g.fillMode = .forwards
-        g.isRemovedOnCompletion = false
-        layer.add(g, forKey: "toast")
+        let up = CGAffineTransform(translationX: 0, y: -px(rise))
+        UIView.animate(withDuration: 0.6, delay: 0, options: [.curveEaseOut, .allowUserInteraction]) {
+            self.alpha = 1; self.transform = up
+        } completion: { _ in
+            UIView.animate(withDuration: 0.6, delay: 1.8, options: [.curveEaseOut]) { self.alpha = 0 }
+        }
     }
+
 }
