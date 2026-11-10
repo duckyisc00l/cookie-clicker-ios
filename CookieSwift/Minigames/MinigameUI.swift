@@ -132,9 +132,10 @@ final class MinigameWindow: UIView {
         scroll.content.addSubview(screen)
         scroll.alwaysBounceVertical = false
         // the bar
-        bar.clipsToBounds = true
+        let woodClip = UIView(); woodClip.clipsToBounds = true; woodClip.tag = 5
         let wood = PicView("img/woodPanels.png"); wood.tag = 4
-        bar.addSubview(wood)
+        woodClip.addSubview(wood)
+        bar.addSubview(woodClip)
         bar.layer.shadowColor = UIColor.black.cgColor; bar.layer.shadowOpacity = 0.6; bar.layer.shadowRadius = px(2); bar.layer.shadowOffset = CGSize(width: 0, height: px(2))
         bar.layer.masksToBounds = false
         title.style.shadow = Shadows.top
@@ -166,8 +167,9 @@ final class MinigameWindow: UIView {
         viewWithTag(3)?.frame = bounds
         let barH = px(Layout.sat + 36)
         bar.frame = CGRect(x: 0, y: 0, width: W, height: barH)
+        bar.viewWithTag(5)?.frame = bar.bounds
         bar.viewWithTag(4)?.frame = CGRect(x: 0, y: 0, width: px(320), height: px(160))
-        title.frame = CGRect(x: px(10), y: barH - px(6 + 22), width: px(250), height: px(24))
+        title.frame = CGRect(x: px(10), y: barH - px(6 + 20), width: px(250), height: px(24))
         close.frame = CGRect(x: W - px(8 + 72), y: barH - px(5 + 24), width: px(72), height: px(24))
         scroll.frame = CGRect(x: 0, y: barH, width: W, height: bounds.height - barH)
         relayoutContent()

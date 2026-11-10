@@ -1,1 +1,1 @@
-popup-grimoire popup-building
+popup-pantheon popup-grimoire
