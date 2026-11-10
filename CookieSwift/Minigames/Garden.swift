@@ -515,7 +515,7 @@ final class Garden: Minigame {
     func soilTooltip(_ id: Int) -> (String, [Int]?) {
         let me = soils[id]
         if parent.amount < me.req { return ("<div style=\"text-align:center;\">Soil unlocked at \(me.req) farms.</div>", nil) }
-        let state = soil == me.id ? "Your field is currently using this soil." : nextSoil > nowMs() ? "You will be able to change your soil again in \(Loc.sayTime((nextSoil - nowMs()) / 1000 * 30 + 30, -1))." : "Click to use this type of soil for your whole field."
+        let state = soil == id ? "Your field is currently using this soil." : nextSoil > nowMs() ? "You will be able to change your soil again in \(Loc.sayTime((nextSoil - nowMs()) / 1000 * 30 + 30, -1))." : "Click to use this type of soil for your whole field."
         let s = name(me.name) + small(state) + "<line></line><div style=\"margin:6px 0px;\"><b>Effects:</b></div><div style=\"font-size:11px;font-weight:bold;\">\(me.effsStr)</div><q>\(me.q)</q>"
         return (s, [me.icon, 34, 1])
     }
