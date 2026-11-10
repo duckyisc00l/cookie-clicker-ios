@@ -28,7 +28,7 @@ enum DebugShots {
                 if what == "markettip", let M = Minigames.market { MinigameWindow.current?.showTooltip { M.goodTooltip(0) } }
                 if what == "pantheontip", let M = Minigames.pantheon {
                     M.slotGod(M.gods[0], 0); M.slotGod(M.gods[3], 1); M.onSlotsChanged?()
-                    MinigameWindow.current?.showTooltip { (M.slotTooltip(0), nil) }
+                    MinigameWindow.current?.showTooltip { (M.slotTooltip(0), M.slotIcon(0)) }
                 }
             }
         case "toast": G.toast("Test toast", "Something happened", [10, 0])

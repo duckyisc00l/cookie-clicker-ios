@@ -163,31 +163,38 @@ final class Pantheon: Minigame {
     }
 
     // MARK: text
-    private func effect(_ html: String, gem: Int? = nil, on: Bool = false, center: Bool = false) -> String {
-        let gemS = gem.map { "<span class=\"tinyIcon\" style=\"background-position:\(-1104 - ($0 == 2 ? 24 : 0))px \(-720 - ($0 == 3 ? 24 : 0))px;\"></span> " } ?? ""
-        return "<div style=\"font-weight:bold;font-size:11px;padding:4px;\(center ? "text-align:center;" : "")\(on ? "color:#fff;" : "")\">\(gemS)\(html)</div>"
+    /// the desktop's tooltip markup (.templeEffect strips with gems)
+    private func eff(_ html: String, gem: Int = 0, on: Bool = false, extra: String = "") -> String {
+        let g = gem > 0 ? "<div class=\"usesIcon templeGem templeGem\(gem)\"></div>" : ""
+        return "<div class=\"templeEffect\(gem > 0 ? " templeEffect\(gem)" : "")\(on ? " templeEffectOn" : "")\"\(extra)>\(g)\(html)</div>"
     }
     func godTooltip(_ me: God, slotForOn: Int? = nil) -> String {
-        var s = "<div style=\"padding-left:44px;font-size:15px;font-weight:bold;color:#fff;\">\(me.name)</div><line></line>"
-        s += "<div style=\"margin:6px 0px;font-weight:bold;\">Effects:</div>"
-        if let on = slotForOn, let f = me.activeDescFunc { s += effect(f(), on: true, center: true) }
-        if let d = me.descBefore { s += effect(d) }
-        if let d = me.desc1 { s += effect(d, gem: 1, on: slotForOn == 0) }
-        if let d = me.desc2 { s += effect(d, gem: 2, on: slotForOn == 1) }
-        if let d = me.desc3 { s += effect(d, gem: 3, on: slotForOn == 2) }
-        if let d = me.descAfter { s += effect(d) }
-        s += "<q>\(me.quote)</q>"
+        var s = "<div style=\"font-size:15px;font-weight:bold;color:#fff;margin:2px 0px;\">\(me.name)</div><line></line><div class=\"description\"><div style=\"margin:6px 0px;font-weight:bold;\">Effects:</div>"
+        if slotForOn != nil, let f = me.activeDescFunc { s += eff(f(), on: true, extra: " style=\"padding:8px 4px;text-align:center;\"") }
+        if let d = me.descBefore { s += eff(d) }
+        if let d = me.desc1 { s += eff(d, gem: 1, on: slotForOn == 0) }
+        if let d = me.desc2 { s += eff(d, gem: 2, on: slotForOn == 1) }
+        if let d = me.desc3 { s += eff(d, gem: 3, on: slotForOn == 2) }
+        if let d = me.descAfter { s += eff(d) }
+        s += "<q>\(me.quote)</q></div>"
         return s
     }
     func slotTooltip(_ id: Int) -> String {
+        let head = "<div class=\"templeEffect\" style=\"font-size:15px;color:#fff;margin-bottom:12px;\"><div class=\"usesIcon templeGem templeGem\(id + 1)\"></div>"
         if slot[id] != -1 {
             let me = gods[slot[id]]
             var sl = me.slot
             if G.hasAura("Supreme Intellect") { sl = max(0, sl - 1) }
-            return effect("\(slotNames[id]) slot", gem: id + 1) + "<div style=\"height:8px;\"></div>" + godTooltip(me, slotForOn: sl)
+            return head + "\(slotNames[id]) slot</div>" + godTooltip(me, slotForOn: sl)
         }
         let what = (slotHovered == id && dragging != nil) ? "Release to assign <b>\(dragging!.name)</b> to this slot." : "Drag a spirit onto this slot to assign it."
-        return effect("\(slotNames[id]) slot (empty)", gem: id + 1) + "<line></line><div>\(what)</div>"
+        return head.replacingOccurrences(of: "margin-bottom:12px;", with: "") + "\(slotNames[id]) slot (empty)</div><line></line><div class=\"description\">\(what)</div>"
+    }
+    /// the spirit's picture floats under the slot's name
+    func slotIcon(_ id: Int) -> [Int]? {
+        guard slot[id] != -1 else { return nil }
+        let ic = gods[slot[id]].icon
+        return [ic[0], ic[1], 0, 35]
     }
     func swapsTooltip() -> String {
         "<div style=\"font-size:11px;text-align:center;\">Each time you slot a spirit, you use up one worship swap.<line></line>If you have 2 swaps left, the next one will refill after \(Loc.sayTime(60 * 60 * 1 * G.fps)).<br>If you have 1 swap left, the next one will refill after \(Loc.sayTime(60 * 60 * 4 * G.fps)).<br>If you have 0 swaps left, you will get one after \(Loc.sayTime(60 * 60 * 16 * G.fps)).<line></line>Unslotting a spirit costs no swaps.</div>"
@@ -270,7 +277,7 @@ final class PantheonScreen: UIView, MinigameScreen {
             gem.tag = 2
             s.addSubview(gem)
             s.layer.shadowColor = UIColor.black.cgColor; s.layer.shadowOpacity = 1; s.layer.shadowRadius = px(2); s.layer.shadowOffset = CGSize(width: px(4), height: px(4))
-            s.onTap = { [weak self] _ in MinigameWindow.current?.showTooltip { [weak self] in (self?.M.slotTooltip(i) ?? "", nil) } }
+            s.onTap = { [weak self] _ in MinigameWindow.current?.showTooltip { [weak self] in (self?.M.slotTooltip(i) ?? "", self?.M.slotIcon(i)) } }
             addSubview(s)
             slotViews.append(s)
         }

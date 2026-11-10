@@ -89,6 +89,18 @@ enum RichText {
     private static var cache: [String: NSAttributedString] = [:]
 
     /// Lays out `html` for a box `width` CSS px wide (nil = no wrapping)
+    /// pictures made in code, used as <img src="reg:key">: (image, width, height in CSS px)
+    static var registered: [String: (UIImage, Double, Double)] = [:]
+    /// a block drawn behind its text (desktop .templeEffect strips with their gem)
+    final class Deco: NSObject {
+        var gem = 0
+        var on = false
+        var bordered = false
+        var x = 0.0
+        var isDescription = false
+        var start = 0
+    }
+    static let decoKey = NSAttributedString.Key("ccDeco")
     static func render(_ html: String, style: TextStyle, width: Double? = nil) -> NSAttributedString {
         let key = "\(style.family)|\(style.size)|\(style.bold)|\(style.color.hashValue)|\(style.align.rawValue)|\(width ?? -1)|\(style.shadow?.shadowOffset.width ?? -9)|\(style.alpha)|\(style.smallCaps)|\(style.pPad)|\(style.textIndent)|\(style.lineHeight ?? 0)|\(style.nowrap)|\(style.italic)|\(style.letterSpacing)|\(K)|\(html)"
         if let c = cache[key] { return c }
@@ -223,6 +235,9 @@ enum RichText {
         var paragraphStart = 0
         var openTags: [(String, Bool)] = []   // tag name, is block
         var blockPadBottom: [Double] = []
+        var blockDecos: [RichText.Deco?] = []
+        var descriptionDepth = 0
+        var forcedLineHeight = 0.0
         var hidden = 0
         var noIndentNext = false
 
@@ -376,7 +391,8 @@ enum RichText {
         func fixLineHeights(_ range: NSRange) {
             var maxSize: CGFloat = 0
             out.enumerateAttribute(.font, in: range) { v, _, _ in if let f = v as? UIFont { maxSize = max(maxSize, f.pointSize) } }
-            let lh = CGFloat(cur.lineHeight ?? 1)
+            var lh = CGFloat(cur.lineHeight ?? 1)
+            if forcedLineHeight > 0 { maxSize = px(forcedLineHeight); lh = 1; forcedLineHeight = 0 }
             if maxSize > 0, let p = (out.attribute(.paragraphStyle, at: range.location, effectiveRange: nil) as? NSParagraphStyle)?.mutableCopy() as? NSMutableParagraphStyle {
                 p.minimumLineHeight = maxSize * lh
                 p.maximumLineHeight = maxSize * lh
@@ -445,6 +461,12 @@ enum RichText {
             let css = RichText.parseStyle(attrs["style"] ?? "")
             var st = cur
             st.nowrap = st.nowrap || css["white-space"] == "nowrap"
+            if classes.contains("templeGem") {
+                let n = classes.contains("templeGem1") ? 1 : classes.contains("templeGem2") ? 2 : 3
+                if let d = blockDecos.last(where: { $0 != nil && !$0!.isDescription }) ?? nil { d.gem = n }
+                if !selfClosing { openTags.append(("pic", false)); hidden += 1 }
+                return
+            }
             switch name {
             case "br":
                 if hidden == 0 {
@@ -469,6 +491,16 @@ enum RichText {
                 if !selfClosing { openTags.append(("line-skip", false)) }
                 return
             case "img":
+                if let src = attrs["src"], src.hasPrefix("reg:"), let (img, w, h) = RichText.registered[String(src.dropFirst(4))], hidden == 0 {
+                    breakBlock()
+                    let save = blocks[blocks.count - 1].align
+                    blocks[blocks.count - 1].align = .center
+                    appendAttachment(img, w: w, h: h, raise: 0)
+                    // the line is as tall as the picture; the picture's middle sits on the middle of the line
+                    forcedLineHeight = h
+                    breakBlock()
+                    blocks[blocks.count - 1].align = save
+                }
                 return
             default: break
             }
@@ -527,6 +559,14 @@ enum RichText {
                 case "hidden", "debugOnly": hidden += 1; openTags.append(("hidden", false)); return
                 case "chromaFocus": st.color = UIColor(css: "#fcc"); st.shadow = Shadows.top
                 case "title": isBlock = false
+                case "dq":
+                    // the desktop's .framed q: right-aligned, grey Georgia italic, 12px, line-height 135%, 8px above
+                    st.size = 12; st.color = UIColor(white: 1, alpha: 0.5); st.lineHeight = 1.35; align = .right; padTop = 8; isBlock = true
+                case "dname":
+                    st.bold = true; st.size = cur.size * 1.1; st.color = .white; padTop = 2; padBottom = 2
+                case "templeEffect":
+                    isBlock = true; st.bold = true; st.size = 11
+                    if classes.contains("templeEffectOn") { st.color = .white }
                 default: break
                 }
             }
@@ -574,8 +614,24 @@ enum RichText {
                 return
             }
 
+            var deco: RichText.Deco? = nil
+            if classes.contains("description") && isBlock { deco = RichText.Deco(); deco!.isDescription = true; descriptionDepth += 1 }
+            if classes.contains("templeEffect") {
+                deco = RichText.Deco()
+                deco!.on = classes.contains("templeEffectOn")
+                deco!.bordered = descriptionDepth > 0
+                if css["padding"] == nil { padTop = 4; padBottom = 4 }
+                // margin:0 -12px; padding-left:28px (the label can't draw outside itself, so the strip starts at its edge)
+                let parentLeft = blocks.last!.left
+                deco!.x = max(0, parentLeft - 12)
+                marginLeft = deco!.x - parentLeft
+                padLeft = 28
+                if css["padding"] != nil { padLeft = max(padLeft, 28) }
+            }
             if isBlock {
                 breakBlock(spaceBefore: max(0, marginTop) + padTop)
+                deco?.start = out.length
+                blockDecos.append(deco)
                 var b = blocks.last!
                 b.left += marginLeft + padLeft
                 b.right += marginRight + padRight
@@ -642,6 +698,19 @@ enum RichText {
             if t.1 {
                 let pad = blockPadBottom.popLast() ?? 0
                 finishParagraph()
+                if let d = blockDecos.popLast() ?? nil {
+                    if d.isDescription { descriptionDepth -= 1 }
+                    else if out.length > d.start {
+                        let r = NSRange(location: d.start, length: out.length - d.start)
+                        out.addAttribute(RichText.decoKey, value: d, range: r)
+                        if d.on {
+                            // text-shadow:0 0 6px currentColor
+                            out.enumerateAttribute(.foregroundColor, in: r) { v, rr, _ in
+                                if let c = v as? UIColor { let s = NSShadow(); s.shadowBlurRadius = px(6); s.shadowOffset = .zero; s.shadowColor = c; out.addAttribute(.shadow, value: s, range: rr) }
+                            }
+                        }
+                    }
+                }
                 if blocks.count > 1 { blocks.removeLast() }
                 if styles.count > 1 { styles.removeLast() }
                 if out.length > paragraphStart || true {
@@ -740,10 +809,38 @@ final class RichLabel: UIView {
         // the storage owns the layout manager, so it's handed back to keep it alive
         return (lm, tc, storage)
     }
+    /// .templeEffect strips: a faint gradient with a line on top, the gem at the left
+    private func drawDecos(_ lm: NSLayoutManager, _ tc: NSTextContainer) {
+        guard let ctx = UIGraphicsGetCurrentContext() else { return }
+        text.enumerateAttribute(RichText.decoKey, in: NSRange(location: 0, length: text.length)) { v, range, _ in
+            guard let d = v as? RichText.Deco else { return }
+            let g = lm.glyphRange(forCharacterRange: range, actualCharacterRange: nil)
+            guard g.length > 0 else { return }
+            let first = lm.lineFragmentUsedRect(forGlyphAt: g.location, effectiveRange: nil)
+            let last = lm.lineFragmentUsedRect(forGlyphAt: NSMaxRange(g) - 1, effectiveRange: nil)
+            let top = first.minY - px(4), bottom = last.maxY + px(4)
+            let box = CGRect(x: px(d.x), y: top, width: bounds.width - px(d.x), height: bottom - top)
+            if d.bordered {
+                let colors = [UIColor(white: 1, alpha: 0).cgColor, UIColor(white: 1, alpha: 0.1).cgColor] as CFArray
+                if let grad = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: colors, locations: [0, 1]) {
+                    ctx.saveGState(); ctx.clip(to: box)
+                    ctx.drawLinearGradient(grad, start: CGPoint(x: 0, y: box.minY), end: CGPoint(x: 0, y: box.maxY), options: [])
+                    ctx.restoreGState()
+                }
+                UIColor(white: 1, alpha: 0.15).setFill()
+                ctx.fill(CGRect(x: box.minX, y: box.minY, width: box.width, height: px(1)))
+            }
+            if d.gem > 0, let img = Res.sprite("img/icons.png", x: [0, 1104.0, 1128, 1104][d.gem], y: [0, 720.0, 720, 744][d.gem], w: 24, h: 24) {
+                img.draw(in: CGRect(x: box.minX, y: box.minY, width: px(24), height: px(24)))
+            }
+        }
+    }
     /// height in CSS px for a width in CSS px
     func fittingHeight(_ width: Double) -> Double {
         let t = RichText.render(html, style: style, width: width)
-        if !exclusions.isEmpty {
+        var hasDeco = false
+        t.enumerateAttribute(RichText.decoKey, in: NSRange(location: 0, length: t.length)) { v, _, stop in if v != nil { hasDeco = true; stop.pointee = true } }
+        if !exclusions.isEmpty || hasDeco {
             let (lm, tc, st) = textKit(t, width: px(width))
             return withExtendedLifetime(st) { Double(ceil(lm.usedRect(for: tc).maxY) / K) }
         }
@@ -770,10 +867,13 @@ final class RichLabel: UIView {
             text.draw(with: CGRect(x: x, y: 0, width: w + 2, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
             return
         }
-        if !exclusions.isEmpty {
+        var hasDeco = false
+        text.enumerateAttribute(RichText.decoKey, in: NSRange(location: 0, length: text.length)) { v, _, stop in if v != nil { hasDeco = true; stop.pointee = true } }
+        if !exclusions.isEmpty || hasDeco {
             let (lm, tc, st) = textKit(text, width: bounds.width)
             withExtendedLifetime(st) {
                 let r = lm.glyphRange(for: tc)
+                if hasDeco { drawDecos(lm, tc) }
                 lm.drawBackground(forGlyphRange: r, at: .zero)
                 lm.drawGlyphs(forGlyphRange: r, at: .zero)
             }

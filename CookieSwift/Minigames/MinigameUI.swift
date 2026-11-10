@@ -213,7 +213,7 @@ final class MinigameWindow: UIView {
             tipIcon.sheet = ic.count > 2 && ic[2] == 1 ? "mgimg/gardenPlants.png" : "img/icons.png"
             tipIcon.icon = [ic[0], ic[1]]; tipIcon.isHidden = false
         } else { tipIcon.isHidden = true }
-        tipText.html = html
+        tipText.html = html.replacingOccurrences(of: "<q>", with: "<q class=\"dq\">")
         layoutTip()
     }
     private func layoutTip() {
@@ -221,7 +221,9 @@ final class MinigameWindow: UIView {
         let W = Double(bounds.width / K)
         let fw = W - 12
         let tw = fw - 16
-        tipText.exclusions = tipIcon.isHidden ? [] : [CGRect(x: -8, y: -8, width: 48 + 4, height: 48)]
+        // a fourth number moves the floated icon down (it floats where it is in the text)
+        let iy = Double((lastTipIcon?.count ?? 0) > 3 ? lastTipIcon![3] : 0)
+        tipText.exclusions = tipIcon.isHidden ? [] : [CGRect(x: -8, y: -8 + iy, width: 48 + 4, height: 48)]
         let th = min(tipText.fittingHeight(tw), Double(bounds.height / K) * 0.55 - 16)
         let fh = th + 16
         let dockH = fh + 3 + 12
@@ -229,7 +231,7 @@ final class MinigameWindow: UIView {
         tipFrame.frame = CGRect(x: 0, y: 0, width: px(fw), height: px(fh))
         tipText.frame = CGRect(x: px(8), y: px(8), width: px(tw), height: px(th))
         tipText.clipsToBounds = true
-        tipIcon.frame = CGRect(x: 0, y: 0, width: px(48), height: px(48))
+        tipIcon.frame = CGRect(x: 0, y: px(iy), width: px(48), height: px(48))
         tipHint.frame = CGRect(x: 0, y: px(fh + 3), width: px(fw), height: px(12))
     }
 

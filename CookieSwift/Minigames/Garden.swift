@@ -500,8 +500,44 @@ final class Garden: Minigame {
         s += "<q>\(me.q)</q>"
         return s
     }
-    private func name(_ s: String) -> String { "<div style=\"padding-left:44px;font-size:15px;font-weight:bold;color:#fff;\">\(s)</div>" }
-    private func small(_ s: String) -> String { "<div style=\"padding-left:44px;\"><small>\(s)</small></div>" }
+    private func name(_ s: String) -> String { "<div style=\"font-size:15px;font-weight:bold;color:#fff;margin:2px 0px;\">\(s)</div>" }
+    private func small(_ s: String) -> String { "<div><small>\(s)</small></div>" }
+    /// the growth bar of the tile tooltip: a 256px gradient bar, a marker for the age, the 4 stages above it
+    private func growthBar(_ me: Plant, _ age: Double) -> String {
+        let key = "growth-\(me.icon)-\(Int(me.mature * 10))-\(Int(age))"
+        if RichText.registered[key] == nil {
+            let W = 280.0, H = 28.0, bx = 12.0, by = 20.0
+            let img = UIGraphicsImageRenderer(size: CGSize(width: px(W), height: px(H))).image { c in
+                let ctx = c.cgContext
+                ctx.scaleBy(x: K, y: K)
+                let bar = CGRect(x: bx, y: by, width: 256, height: 6)
+                UIColor.black.setFill(); ctx.fill(bar.insetBy(dx: -1, dy: -1))
+                let m = me.mature / 100
+                let cols = [UIColor(css: "#fff"), UIColor(css: "#0f9"), UIColor(css: "#3c0"), UIColor(css: "#960")].map { $0.cgColor } as CFArray
+                if let g = CGGradient(colorsSpace: CGColorSpaceCreateDeviceRGB(), colors: cols, locations: [0, CGFloat(m), CGFloat(min(1, m + 0.001)), 1]) {
+                    ctx.saveGState(); ctx.clip(to: bar)
+                    ctx.drawLinearGradient(g, start: CGPoint(x: bar.minX, y: 0), end: CGPoint(x: bar.maxX, y: 0), options: [])
+                    // inset: 1px white edge, a soft light at the bottom
+                    UIColor(white: 1, alpha: 0.5).setStroke(); ctx.setLineWidth(1); ctx.stroke(bar.insetBy(dx: 0.5, dy: 0.5))
+                    ctx.restoreGState()
+                }
+                for (i, p) in [0, me.mature * 0.333, me.mature * 0.666, me.mature].enumerated() {
+                    if let ic = Res.sprite("mgimg/gardenPlants.png", x: Double((i + 1) * 48), y: Double(me.icon * 48), w: 48, h: 48) {
+                        ic.draw(in: CGRect(x: bx + p / 100 * 256 - 12, y: by - 20, width: 24, height: 24))
+                    }
+                }
+                // .gardenGrowthIndicator
+                let x = bx + (age / 100 * 256).rounded(.down)
+                UIColor(white: 0, alpha: 0.5).setFill(); ctx.fill(CGRect(x: x - 1, y: by - 1, width: 5, height: 10))
+                UIColor.black.setFill(); ctx.fill(CGRect(x: x - 2, y: by - 2, width: 5, height: 10))
+                UIColor.white.setFill(); ctx.fill(CGRect(x: x - 1, y: by - 1, width: 3, height: 8))
+                UIColor.black.setFill(); ctx.fill(CGRect(x: x, y: by, width: 1, height: 6))
+            }
+            if RichText.registered.count > 400 { RichText.registered.removeAll() }
+            RichText.registered[key] = (img, W, H)
+        }
+        return "<img src=\"reg:\(key)\">"
+    }
     func seedTooltip(_ id: Int) -> (String, [Int]?) {
         let me = plants[id]
         var s = name("\(me.name) seed")
@@ -570,7 +606,7 @@ final class Garden: Minigame {
         let dragonBoost = 1 / (1 + 0.05 * G.auraMult("Supreme Intellect"))
         let pb = plotBoost[y][x][0]
         let avg = me.ageTick + me.ageTickR / 2
-        var s = name(me.name) + small("This plant is growing here.") + "<line></line><div style=\"text-align:center;\">"
+        var s = name(me.name) + small("This plant is growing here.") + "<line></line><div style=\"text-align:center;\">" + growthBar(me, tile[1])
         s += "<b>Stage:</b> \(["bud", "sprout", "bloom", "mature"][st - 1])<br>"
         s += "<small>Plant effects: " + (st == 1 ? "10%" : st == 2 ? "25%" : st == 3 ? "50%" : "100%; may reproduce, will drop seed when harvested") + "</small><br><small>"
         if st < 4 {
