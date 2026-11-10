@@ -723,7 +723,7 @@ final class RichLabel: UIView {
     }
     /// areas the text flows around (floats), in CSS px
     var exclusions: [CGRect] = [] { didSet { setNeedsDisplay() } }
-    private func textKit(_ t: NSAttributedString, width: CGFloat) -> (NSLayoutManager, NSTextContainer) {
+    private func textKit(_ t: NSAttributedString, width: CGFloat) -> (NSLayoutManager, NSTextContainer, NSTextStorage) {
         let storage = NSTextStorage(attributedString: t)
         let lm = NSLayoutManager()
         let tc = NSTextContainer(size: CGSize(width: width, height: 100000))
@@ -732,14 +732,15 @@ final class RichLabel: UIView {
         lm.addTextContainer(tc)
         storage.addLayoutManager(lm)
         lm.ensureLayout(for: tc)
-        return (lm, tc)
+        // the storage owns the layout manager, so it's handed back to keep it alive
+        return (lm, tc, storage)
     }
     /// height in CSS px for a width in CSS px
     func fittingHeight(_ width: Double) -> Double {
         let t = RichText.render(html, style: style, width: width)
         if !exclusions.isEmpty {
-            let (lm, tc) = textKit(t, width: px(width))
-            return Double(ceil(lm.usedRect(for: tc).maxY) / K)
+            let (lm, tc, st) = textKit(t, width: px(width))
+            return withExtendedLifetime(st) { Double(ceil(lm.usedRect(for: tc).maxY) / K) }
         }
         return Double(RichText.size(t, width: width).height)
     }
@@ -754,10 +755,12 @@ final class RichLabel: UIView {
             return
         }
         if !exclusions.isEmpty {
-            let (lm, tc) = textKit(text, width: bounds.width)
-            let r = lm.glyphRange(for: tc)
-            lm.drawBackground(forGlyphRange: r, at: .zero)
-            lm.drawGlyphs(forGlyphRange: r, at: .zero)
+            let (lm, tc, st) = textKit(text, width: bounds.width)
+            withExtendedLifetime(st) {
+                let r = lm.glyphRange(for: tc)
+                lm.drawBackground(forGlyphRange: r, at: .zero)
+                lm.drawGlyphs(forGlyphRange: r, at: .zero)
+            }
             return
         }
         text.draw(with: CGRect(x: 0, y: 0, width: bounds.width, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
