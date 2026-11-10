@@ -350,7 +350,6 @@ final class ToastsView: PassView {
             v.frame = CGRect(x: px(16), y: self.bounds.height - px(h), width: self.bounds.width - px(32), height: px(h))
             self.addSubview(v)
             self.live.append(v)
-            DebugLog.log("toast at \(Int(nowMs())) y=\(v.frame.minY)")
             v.rise = id % 2 == 0 ? 64 : 112
             v.born = nowMs()
             v.step()

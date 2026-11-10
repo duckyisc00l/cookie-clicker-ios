@@ -51,13 +51,7 @@ jobs:
           for scr in $SCREENS; do
             xcrun simctl terminate "$UDID" com.duckyisc00l.cookieclicker || true
             SIMCTL_CHILD_CC_SHOT=$scr xcrun simctl launch "$UDID" com.duckyisc00l.cookieclicker
-            echo "$scr launched $(python3 -c 'import time;print(int(time.time()*1000))')" >> shots/times.txt
-            sleep 3
-            xcrun simctl io "$UDID" screenshot "shots/$scr-3s.png"
-            sleep 2
-            xcrun simctl io "$UDID" screenshot "shots/$scr-5s.png"
-            sleep 2
-            echo "$scr shot $(python3 -c 'import time;print(int(time.time()*1000))')" >> shots/times.txt
+            sleep 7
             xcrun simctl io "$UDID" screenshot "shots/$scr.png"
             PID=$(pgrep -n -f "CookieClicker.app/CookieClicker" || true)
             if [ -n "$PID" ]; then sample "$PID" 1 -file "shots/sample-$scr.txt" >/dev/null 2>&1 || true; fi
