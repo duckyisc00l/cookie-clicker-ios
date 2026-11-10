@@ -176,7 +176,7 @@ enum UpgradeUI {
 
 enum AchievUI {
     static func showInfo(_ me: Achiev) {
-        let icon = me.iconFunc?() ?? me.icon
+        let icon = me.icon
         Popup.open(PopupOptions(build: { c in
             c.h3("Achievement info")
             c.nameBox(IconNameBox(icon: IconView(icon), name: me.name, nameStyle: me.style))
@@ -295,7 +295,7 @@ enum LumpUI {
             let holder = UIView()
             holder.addSubview(icon)
             icon.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
-            c.add(holder, height: 72, marginTop: 4) { _ in
+            c.add(holder, marginTop: 4) { _ in
                 icon.center = CGPoint(x: holder.bounds.midX, y: px(36))
                 return 72
             }
