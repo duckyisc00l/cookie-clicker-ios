@@ -6,6 +6,7 @@ final class GameViewController: UIViewController {
     private var timer: Timer?
     private var lastTime = 0.0
     private(set) var started = false
+    private var lastLayoutKey = ""
     let root = RootView()
 
     override var prefersStatusBarHidden: Bool { true }
@@ -43,6 +44,10 @@ final class GameViewController: UIViewController {
     func resizeGame() {
         let b = view.bounds
         guard b.width > 0 else { return }
+        // only when the size or the safe area really changed (this runs on every layout pass)
+        let key = "\(b.size)|\(view.safeAreaInsets)"
+        if key == lastLayoutKey { return }
+        lastLayoutKey = key
         K = b.width / 320
         G.w = 320
         Layout.sat = Double(view.safeAreaInsets.top / K)
