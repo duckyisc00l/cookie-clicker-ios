@@ -120,6 +120,7 @@ final class StoreScreen: GameScreen {
     private func bulkFont() -> TextStyle {
         var f = TextStyle.fancy(11, color: .ccText)
         f.bold = true
+        f.nowrap = true
         f.shadow = Shadows.button
         return f
     }

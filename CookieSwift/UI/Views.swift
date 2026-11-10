@@ -295,6 +295,10 @@ final class CCButton: TapView {
         let h = CGFloat(label.fittingHeight(Double(inner.width / K))) * K
         // text sits at the top padding, like a block box
         label.frame = CGRect(x: inner.minX, y: px(Double(p.top)), width: inner.width, height: max(h, bounds.height - px(Double(p.top + p.bottom))))
+        if font.nowrap {
+            // white-space:nowrap text may spill out of the button, centred
+            label.frame = CGRect(x: -px(30), y: px(Double(p.top)), width: bounds.width + px(60), height: px(font.size + 4))
+        }
     }
     /// height of this button for a width (CSS px), from its padding and text
     func fittingHeight(width: Double) -> Double {

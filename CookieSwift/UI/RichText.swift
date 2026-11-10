@@ -45,7 +45,7 @@ struct TextStyle {
             let m = CGAffineTransform(a: 1, b: 0, c: 0.2, d: 1, tx: 0, ty: 0)
             f = UIFont(descriptor: f.fontDescriptor.withMatrix(m), size: f.pointSize)
         }
-        if smallCaps {
+        if smallCaps && family != .fancy && false {
             let d = f.fontDescriptor.addingAttributes([.featureSettings: [
                 [UIFontDescriptor.FeatureKey.type: kLowerCaseType, UIFontDescriptor.FeatureKey.selector: kLowerCaseSmallCapsSelector]
             ]])
@@ -297,6 +297,25 @@ enum RichText {
             }
             if cur.nowrap { s = s.replacingOccurrences(of: " ", with: "\u{00A0}") }
             if s.isEmpty { return }
+            if cur.smallCaps {
+                // fonts without real small capitals get them faked: lowercase letters as capitals at 70%
+                var small = cur; small.smallCaps = false; small.size = cur.size * 0.7
+                var big = cur; big.smallCaps = false
+                let aBig = attributes(big)
+                var aSmall = attributes(small)
+                // keep the small letters on the same baseline as the big ones
+                aSmall[.baselineOffset] = aBig[.baselineOffset]
+                var run = "", runSmall = false
+                func flush() { if !run.isEmpty { out.append(NSAttributedString(string: run, attributes: runSmall ? aSmall : aBig)); run = "" } }
+                for ch in s {
+                    let isSmall = ch.isLowercase
+                    if isSmall != runSmall { flush(); runSmall = isSmall }
+                    run += isSmall ? ch.uppercased() : String(ch)
+                }
+                flush()
+                atLineStart = false
+                return
+            }
             out.append(NSAttributedString(string: s, attributes: attributes(cur)))
             atLineStart = false
         }
@@ -709,6 +728,14 @@ final class RichLabel: UIView {
     }
     var textSize: CGSize { RichText.size(text, width: style.nowrap ? nil : Double(bounds.width / K)) }
     override func draw(_ rect: CGRect) {
-        text.draw(with: CGRect(x: 0, y: 0, width: style.nowrap ? .greatestFiniteMagnitude : bounds.width, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+        if style.nowrap {
+            // one line: place it ourselves (alignment needs a width)
+            let w = text.boundingRect(with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil).width
+            var x: CGFloat = 0
+            if style.align == .center { x = (bounds.width - w) / 2 } else if style.align == .right { x = bounds.width - w }
+            text.draw(with: CGRect(x: x, y: 0, width: w + 2, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
+            return
+        }
+        text.draw(with: CGRect(x: 0, y: 0, width: bounds.width, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
     }
 }

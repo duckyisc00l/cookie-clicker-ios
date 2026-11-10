@@ -10,6 +10,7 @@ final class IconNameBox: UIView {
     let name = RichLabel()
     let sub = RichLabel()
     let isBuilding: Bool
+    private var animated = false
     /// upgrade/achievement: icon + name; building: 64px picture + name + "Owned" line
     init(icon: UIView, name html: String, nameStyle: String? = nil, building: Bool = false) {
         self.icon = icon
@@ -53,8 +54,11 @@ final class IconNameBox: UIView {
             let nh = name.fittingHeight(nw)
             name.frame = CGRect(x: px(64 + 8), y: px((h - nh) / 2), width: px(nw), height: px(nh))
         }
-        Anim.switchAnim(icon, "switchLeftIn")
-        Anim.switchAnim(name, "switchRightIn")
+        if !animated {
+            animated = true
+            Anim.switchAnim(icon, "switchLeftIn")
+            Anim.switchAnim(name, "switchRightIn")
+        }
     }
 }
 
@@ -66,7 +70,7 @@ extension PopupContent {
     /// <p class="switchTopIn" style="text-align:right;color:rgba(255,255,255,0.65);"><q>…</q></p>
     func quote(_ q: String) {
         let l = html("<p style=\"text-align:right;color:rgba(255,255,255,0.65);\"><q>\(q)</q></p>")
-        Anim.switchAnim(l, "switchTopIn")
+        DispatchQueue.main.async { Anim.switchAnim(l, "switchTopIn") }
     }
 }
 
