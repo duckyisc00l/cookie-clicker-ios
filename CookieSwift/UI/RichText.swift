@@ -21,6 +21,8 @@ struct TextStyle {
     var nowrap = false
     /// padding of <p> (4px; #statsData p has 2px)
     var pPad: Double = 4
+    /// text-overflow:ellipsis on one line
+    var ellipsis = false
 
     static let ticker: TextStyle = {
         var s = TextStyle(); s.family = .fancy; s.size = 14; s.color = .white; s.nowrap = true
@@ -752,6 +754,17 @@ final class RichLabel: UIView {
             // one line: place it ourselves (alignment needs a width)
             let w = text.boundingRect(with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil).width
             var x: CGFloat = 0
+            if style.ellipsis && w > bounds.width {
+                let m = NSMutableAttributedString(attributedString: text)
+                m.enumerateAttribute(.paragraphStyle, in: NSRange(location: 0, length: m.length)) { v, r, _ in
+                    let p = ((v as? NSParagraphStyle)?.mutableCopy() as? NSMutableParagraphStyle) ?? NSMutableParagraphStyle()
+                    p.lineBreakMode = .byTruncatingTail
+                    m.addAttribute(.paragraphStyle, value: p, range: r)
+                }
+                m.mutableString.replaceOccurrences(of: "\u{00A0}", with: " ", options: [], range: NSRange(location: 0, length: m.length))
+                m.draw(with: CGRect(x: 0, y: 0, width: bounds.width, height: bounds.height), options: [.usesLineFragmentOrigin, .truncatesLastVisibleLine], context: nil)
+                return
+            }
             if style.align == .center { x = (bounds.width - w) / 2 } else if style.align == .right { x = bounds.width - w }
             text.draw(with: CGRect(x: x, y: 0, width: w + 2, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil)
             return

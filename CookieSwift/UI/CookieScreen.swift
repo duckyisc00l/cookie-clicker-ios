@@ -438,7 +438,7 @@ final class QuickButton: TapView {
             // prestigeStatus1 (on a .quickButton: still fully visible and pressable)
             alpha = 1
             isUserInteractionEnabled = true
-            slot.image = Res.sprite("img/ascendSlot.png", x: 88, y: 0, w: 88, h: 88)
+            slot.image = Res.sprite("img/ascendSlot.png", x: 176, y: 0, w: 88, h: 88)
             iconV.alpha = 1
             Anim.squish(iconV, on: false)
         case 2:
@@ -450,7 +450,7 @@ final class QuickButton: TapView {
         default:
             alpha = 1
             isUserInteractionEnabled = true
-            slot.image = Res.sprite("img/ascendSlot.png", x: 88, y: 0, w: 88, h: 88)
+            slot.image = Res.sprite("img/ascendSlot.png", x: 176, y: 0, w: 88, h: 88)
             iconV.alpha = 0.5   // filter:brightness(50%)
             iconV.backgroundColor = .clear
             Anim.squish(iconV, on: false)

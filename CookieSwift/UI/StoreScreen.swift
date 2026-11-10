@@ -316,7 +316,7 @@ class StoreRow: UIView {
         dim.isUserInteractionEnabled = false
         addSubview(dim)
         var ns = TextStyle.fancy(14)
-        ns.nowrap = true; ns.shadow = Shadows.bar
+        ns.nowrap = true; ns.ellipsis = true; ns.shadow = Shadows.bar
         nameL.style = ns
         var ds = TextStyle.base(10, color: .white)
         ds.textIndent = 4; ds.shadow = Shadows.bar; ds.lineHeight = 0.85

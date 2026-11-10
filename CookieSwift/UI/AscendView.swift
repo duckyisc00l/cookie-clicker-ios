@@ -305,7 +305,7 @@ final class TreeIcon: TapView {
         status = s
         isUserInteractionEnabled = s >= 2
         icon.isHidden = s == 1
-        slot.image = Res.sprite("img/ascendSlot.png", x: s == 3 ? 0 : 88, y: 0, w: 88, h: 88)
+        slot.image = Res.sprite("img/ascendSlot.png", x: s == 3 ? 0 : 176, y: 0, w: 88, h: 88)
         let a: CGFloat = s == 0 ? 0 : s == 1 ? 0.2 : 1
         UIView.animate(withDuration: 2) { self.alpha = a }
     }

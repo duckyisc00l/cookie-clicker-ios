@@ -713,7 +713,7 @@ final class QuickButtonPreview: TapView {
         super.init(frame: CGRect(x: 0, y: 0, width: px(48), height: px(48)))
         addSubview(icon)
         slot.frame = CGRect(x: -px(20), y: -px(20), width: px(88), height: px(88))
-        slot.image = Res.sprite("img/ascendSlot.png", x: 88, y: 0, w: 88, h: 88)
+        slot.image = Res.sprite("img/ascendSlot.png", x: 176, y: 0, w: 88, h: 88)
         addSubview(slot)
         var st = TextStyle.fancy(15, color: UIColor(css: "#fcc")); st.align = .center; st.shadow = Shadows.top
         text.style = st
