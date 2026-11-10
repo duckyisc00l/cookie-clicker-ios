@@ -316,7 +316,7 @@ final class Market: Minigame {
         s += "&bull; You currently own \(ic)<b>\(B(me.stock))</b>x \(name) (worth <b>$\(B(val * me.stock, 2))</b>).<br>"
         s += "&bull; Your warehouses can store up to \(ic)<b>\(B(getGoodMaxStock(me)))</b>x \(name).<br>"
         s += "&bull; You may increase your storage space by upgrading your offices and by buying more \(inlineIcon([me.building.icon[0], 0]))\(me.building.plural). You also get 10 extra storage space per \(me.building.single) level (currently: <b>+\(me.building.level * 10)</b>).<br>"
-        s += "&bull; The average worth of this stock and how high it can peak depends on the building it is tied to, along with the level of your \(inlineIcon([15, 0]))\(G.buildingsBN["Bank"]!.plural).</div> + "<div style=\"font-size:11px;opacity:0.5;margin-top:3px;\">Shift-click the hide button to toggle all other stocks.</div>"
+        s += "&bull; The average worth of this stock and how high it can peak depends on the building it is tied to, along with the level of your \(inlineIcon([15, 0]))\(G.buildingsBN["Bank"]!.plural).</div>" + "<div style=\"font-size:11px;opacity:0.5;margin-top:3px;\">Shift-click the hide button to toggle all other stocks.</div>"
         return (s, me.icon)
     }
     func tradeTooltip(_ id: Int, _ nIn: Double) -> (String, [Int]?) {
