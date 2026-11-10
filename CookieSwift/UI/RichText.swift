@@ -5,7 +5,7 @@ import UIKit
 // everywhere, from lib/style.css), paragraphs, quotes, icons and cost tags.
 
 struct TextStyle {
-    enum Family { case base, fancy, georgia, arial }
+    enum Family { case base, fancy, georgia, arial, merriweather }
     var family: Family = .base
     var size: Double = 11
     var bold = false
@@ -40,6 +40,7 @@ struct TextStyle {
         switch family {
         case .fancy: f = Fonts.fancy(size)
         case .georgia: f = Fonts.georgia(size, bold: bold, italic: italic)
+        case .merriweather: f = UIFont(name: "Merriweather-Black", size: px(size)) ?? Fonts.georgia(size, bold: true)
         case .base, .arial:
             let name = bold && italic ? "Arial-BoldItalicMT" : bold ? "Arial-BoldMT" : italic ? "Arial-ItalicMT" : "ArialMT"
             f = UIFont(name: name, size: px(size)) ?? .systemFont(ofSize: px(size))

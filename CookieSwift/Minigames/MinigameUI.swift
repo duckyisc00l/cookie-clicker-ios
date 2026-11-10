@@ -201,12 +201,18 @@ final class MinigameWindow: UIView {
     }
     func hideTooltip() { tipFunc = nil; tipDock.isHidden = true }
     private var lastTip = ""
+    private var lastTipIcon: [Int]? = nil
     func updateTooltip() {
         guard let f = tipFunc else { return }
         let (html, icon) = f()
-        if html == lastTip && tipIcon.icon == (icon ?? tipIcon.icon) { return }
+        if html == lastTip && lastTipIcon == icon { return }
         lastTip = html
-        if let ic = icon { tipIcon.icon = ic; tipIcon.isHidden = false } else { tipIcon.isHidden = true }
+        lastTipIcon = icon
+        if let ic = icon {
+            // a third number picks the sheet: 1 is the garden's plants
+            tipIcon.sheet = ic.count > 2 && ic[2] == 1 ? "mgimg/gardenPlants.png" : "img/icons.png"
+            tipIcon.icon = [ic[0], ic[1]]; tipIcon.isHidden = false
+        } else { tipIcon.isHidden = true }
         tipText.html = html
         layoutTip()
     }

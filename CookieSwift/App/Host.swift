@@ -21,6 +21,12 @@ final class ExtrasHost: GameHost {
         }
         // regular backups while playing
         backupTimer = Timer.scheduledTimer(withTimeInterval: 600, repeats: true) { [weak self] _ in self?.autoBackup() }
+        // reminders.js: auto-harvest ripe sugar lumps, and garden messages
+        Timer.scheduledTimer(withTimeInterval: 2, repeats: true) { _ in
+            guard AppSettings.shared.autoHarvest, Lumps.canLumps(), G.lumpT > 0 else { return }
+            if nowMs() - G.lumpT >= Lumps.ripeAge { Lumps.harvestLumpNow() }
+        }
+        Timer.scheduledTimer(withTimeInterval: 3, repeats: true) { _ in GardenAlerts.check() }
         // numbers for the Live Activity
         statsTimer = Timer.scheduledTimer(withTimeInterval: 5, repeats: true) { _ in
             LiveActivityManager.shared.gameStats(cookies: B(G.cookies), short: ExtrasHost.shortNumber(G.cookies), perSecond: B(G.cookiesPs, 1))

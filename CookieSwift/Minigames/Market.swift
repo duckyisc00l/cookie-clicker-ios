@@ -492,6 +492,7 @@ final class BankButton: TapView {
         super.init(frame: .zero)
         backgroundColor = .clear
         isOpaque = false
+        contentMode = .redraw
         alpha = 0.95
         var st = TextStyle.base(13); st.bold = true; st.align = .center; st.nowrap = true
         label.style = st
