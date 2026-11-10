@@ -273,6 +273,16 @@ enum LumpUI {
         }
         c.buttons([b], marginTop: 2, marginBottom: 2, height: 19)
         c.html("<p style=\"text-align:center;font-size:85%;color:rgba(255,255,255,0.6);\">You have \(B(G.lumps)) sugar lump\(G.lumps == 1 ? "" : "s").</p>", marginBottom: 4)
+        // minigame-bridge.js: open the minigame, or say how to unlock it
+        if let mg = Minigames.names[me.name] {
+            if me.level >= 1 {
+                let o = CCButton("Open \(mg)", look: .bump)
+                o.onTap = { _ in Minigames.openWindow(me.name) }
+                c.buttons([o], marginTop: 6, height: 19)
+            } else {
+                c.html("<div style=\"text-align:center;font-size:85%;color:rgba(255,255,255,0.7);\">Levelling up your \(me.plural) unlocks the <b>\(mg)</b> minigame.</div>")
+            }
+        }
     }
 
     /// G.lumpPopup

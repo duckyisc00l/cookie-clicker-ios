@@ -71,6 +71,7 @@ final class RootView: UIView, GameUI {
     // MARK: building
     func build() {
         built = true
+        Minigames.root = self
         screens = [
             "cookie": CookieScreen(),
             "store": StoreScreen(),
@@ -139,6 +140,7 @@ final class RootView: UIView, GameUI {
         }
         sparkles.draw()
         top.popups.tick()
+        Minigames.drawShown()
     }
 
     func applyBG() {

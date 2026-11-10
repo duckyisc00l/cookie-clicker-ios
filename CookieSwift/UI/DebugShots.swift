@@ -9,6 +9,10 @@ enum DebugShots {
         case "achiev": if let a = G.achievs.first(where: { $0.owned != 0 }) { AchievUI.showInfo(a) }
         case "lump": LumpUI.popup()
         case "ascend": G.showAscend(2)
+        case "grimoire", "garden", "market", "pantheon":
+            for (n, l) in [("Farm", 5), ("Bank", 3), ("Temple", 3), ("Wizard tower", 3)] { if let b = G.buildingsBN[n], b.level < l { b.level = l } }
+            Minigames.loadAll()
+            Minigames.openWindow(["grimoire": "Wizard tower", "garden": "Farm", "market": "Bank", "pantheon": "Temple"][what]!)
         case "toast": G.toast("Test toast", "Something happened", [10, 0])
         default: break
         }

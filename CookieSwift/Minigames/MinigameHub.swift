@@ -112,7 +112,10 @@ enum Minigames {
         }
     }
     static func logic(_ delta: Double) {
+        if G.onAscend != 0 { return }
         for n in order { loaded[n]?.logic() }
+        // the lump refill cooldown counts down in frames, like the desktop game
+        if G.lumpRefill > 0 { G.lumpRefill -= 1 }
     }
     static func onLevelUp(_ me: Building) {
         guard let mg = names[me.name] else { return }
