@@ -336,7 +336,7 @@ final class ToastsView: PassView {
         DispatchQueue.main.asyncAfter(deadline: .now() + delay) { [weak self] in
             guard let self = self else { return }
             if G.seed != oldSeed { DebugLog.log("toast dropped: seed"); self.pending -= 1; return }
-            DebugLog.log("toast shown \(title) bounds=\(self.bounds) hidden=\(self.isHidden) alpha=\(self.alpha) super=\(String(describing: self.superview?.isHidden))")
+            DebugLog.log("toast shown \(nowMs()) \(title) bounds=\(self.bounds) hidden=\(self.isHidden) alpha=\(self.alpha) super=\(String(describing: self.superview?.isHidden))")
             if self.live.count > 5 { self.live.first?.removeFromSuperview(); self.live.removeFirst() }
             var t = "", tp = ""
             if !title.isEmpty { t = "<div style=\"\((reverse && icon != nil) ? "padding-left:8px;" : "")font-size:16px;font-family:Fancy;\">\(title)</div>" }

@@ -31,7 +31,7 @@ enum DebugShots {
                     MinigameWindow.current?.showTooltip { (M.slotTooltip(0), M.slotIcon(0)) }
                 }
             }
-        case "toast": DispatchQueue.main.asyncAfter(deadline: .now() + 5.3) { G.toast("Garden: ready!", "<b>Baker's wheat</b> is now mature.", [15, 9]) }
+        case "toast": for i in 0..<8 { DispatchQueue.main.asyncAfter(deadline: .now() + 1 + Double(i) * 1.5) { G.toast("Garden: ready!", "<b>Baker's wheat</b> is now mature.", [15, 9]) } }
         default: break
         }
     }
