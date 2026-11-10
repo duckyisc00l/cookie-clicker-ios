@@ -214,7 +214,7 @@ final class StatsScreen: GameScreen {
             logB.frame.origin = CGPoint(x: px(8 + W - 2 - 56), y: px(y + 4 + 2))
             newsB.frame.origin = CGPoint(x: px(8 + W - 2 - 56), y: px(y + 4 + 2 + 54 + 4 + 4))
             // the numbers flow around them
-            let floatBottom = 4 + 2 + 54 + 8 + 54 + 2 - 8
+            let floatBottom: Double = 4 + 2 + 54 + 8 + 54 + 2 - 8
             stats.exclusions = [CGRect(x: W - 60, y: 0, width: 60, height: floatBottom)]
             let sh = stats.fittingHeight(W)
             statsBox.frame = CGRect(x: px(8), y: px(y + 4), width: px(W), height: px(sh + 8))
