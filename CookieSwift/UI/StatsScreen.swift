@@ -205,9 +205,9 @@ final class StatsScreen: GameScreen {
             return ch
         }
 
-        relayout = { [weak self] in
-            guard let self = self, let p = self.panel else { return }
-            var y = 8.0
+        func layoutAll() {
+            guard let p = self.panel else { return }
+            var y: Double = 8.0
             header.frame = CGRect(x: px(8 + (W - header.cssWidth) / 2), y: px(y + 2), width: px(header.cssWidth), height: px(45))
             y += 45 + 2 - 12
             // float right: Log, News (margin-top 4px, each a bumpButton with 2px margins)
@@ -254,7 +254,8 @@ final class StatsScreen: GameScreen {
             p.scroll.setContentHeight(px(y + 8))
             p.scroll.content.bringSubviewToFront(header)
         }
-        relayout?()
+        relayout = layoutAll
+        layoutAll()
     }
     override func clean() { panel = nil; relayout = nil; updaters = [] }
     override func draw() {
