@@ -31,9 +31,9 @@ final class GameViewController: UIViewController {
             ExtrasHost.shared.start()
             // screenshots on the test machine: open a given screen
             if let shot = ProcessInfo.processInfo.environment["CC_SHOT"] {
-                if shot == "upgrades" { G.onStoreSection = "upgrades"; G.setScreen("store") }
+                if shot == "upgrades" { G.onStoreSection = "upgrades"; G.setScreen("store", force: true) }
                 else if shot.hasPrefix("popup-") { DebugShots.open(String(shot.dropFirst(6))) }
-                else { G.setScreen(shot) }
+                else { G.setScreen(shot, force: true) }
             }
             DebugLog.log("starting loop")
             lastTime = nowMs()

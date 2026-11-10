@@ -73,8 +73,10 @@ final class StoreScreen: GameScreen {
     }
 
     // MARK: G.setStoreSection
+    private var currentSection = ""
     func setSection(_ id: String) {
         G.onStoreSection = id
+        currentSection = id
         for (k, t) in tabs { t.setOn(k == id) }
         section?.subviews.forEach { $0.removeFromSuperview() }
         options.subviews.forEach { $0.removeFromSuperview() }
@@ -187,7 +189,7 @@ final class StoreScreen: GameScreen {
         return list.isEmpty ? [-1] : list.map { $0.id }
     }
     func refreshUpgrades(force: Bool = false) {
-        guard let l = list, G.onStoreSection == "upgrades" else { return }
+        guard let l = list, currentSection == "upgrades" else { return }
         let data = upgradeList()
         if !force && data == upgradeData {
             // redrawFunc: two rows at a time
@@ -223,7 +225,7 @@ final class StoreScreen: GameScreen {
 
     override func draw() {
         // the list refreshes 4 times a second
-        if G.onStoreSection == "upgrades" && nowMs() - lastUpgradeRefresh >= 250 {
+        if currentSection == "upgrades" && nowMs() - lastUpgradeRefresh >= 250 {
             lastUpgradeRefresh = nowMs()
             refreshUpgrades()
         }

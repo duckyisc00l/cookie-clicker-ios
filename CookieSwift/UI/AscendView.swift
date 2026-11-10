@@ -18,7 +18,6 @@ final class AscendView {
     init(mode: Int) {
         self.mode = mode
         var o = PopupOptions(build: { [unowned self] c in self.build(c) }, close: nil, fullPopup: true)
-        o.background = "img/starbg.jpg"
         o.introAnim = "ascendPopupAnimIn"
         o.replace = true
         o.contentPadding = .zero
@@ -107,7 +106,9 @@ final class AscendView {
             self.popup = p
             let W = Double(p.bounds.width / K), H = Double(p.bounds.height / K)
             bar.frame = CGRect(x: 0, y: px(16), width: px(W), height: px(20))
-            self.chipsL.frame = CGRect(x: px(16), y: px(4), width: px(W - 32), height: px(14))
+            let ch = self.chipsL.fittingHeight(W - 32)
+            self.chipsL.frame = CGRect(x: px(16), y: px(4 + (12 - ch) / 2), width: px(W - 32), height: px(ch))
+            self.chipsL.clipsToBounds = false
             p.addSubview(bar)
             pinch.frame = CGRect(x: px(8), y: px(H - 8 - 20), width: px(70), height: px(22))
             p.addSubview(pinch)
@@ -185,6 +186,7 @@ final class AscendView {
         tree.minimumZoomScale = s * 0.5
         tree.maximumZoomScale = s * 4
         if !fitted { tree.zoomScale = s; fitted = true }
+        DebugLog.log("fit cw=\(cw) ch=\(ch) content=\(content.bounds) s=\(s) zoom=\(tree.zoomScale)")
         ZoomDelegate.shared.center(tree)
     }
 
