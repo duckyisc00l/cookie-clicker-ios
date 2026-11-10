@@ -98,8 +98,19 @@ enum Res {
                 }
             }
         }
+        if let i = img, let cg = i.cgImage, let d = decoded(cg) {
+            // decode once: crops of a lazily-decoded picture would decode the whole file again every time
+            img = UIImage(cgImage: d, scale: i.scale, orientation: .up)
+        }
         if let i = img { cache[path] = i }
         return img
+    }
+    private static func decoded(_ cg: CGImage) -> CGImage? {
+        let w = cg.width, h = cg.height
+        guard let ctx = CGContext(data: nil, width: w, height: h, bitsPerComponent: 8, bytesPerRow: 0, space: CGColorSpaceCreateDeviceRGB(),
+                                  bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue) else { return nil }
+        ctx.draw(cg, in: CGRect(x: 0, y: 0, width: w, height: h))
+        return ctx.makeImage()
     }
 
     /// a cropped piece of a sprite sheet, in CSS px (background-position -x -y, size w h)
