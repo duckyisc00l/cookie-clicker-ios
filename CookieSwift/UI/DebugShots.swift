@@ -41,7 +41,15 @@ enum DebugShots {
                 }
                 dump(w, 0)
                 let red = UIView(frame: CGRect(x: 40, y: 300, width: 100, height: 100)); red.backgroundColor = .red
-                (UIEvents.shared.ui as? RootView)?.top.toasts.addSubview(red)
+                guard let tv = (UIEvents.shared.ui as? RootView)?.top.toasts else { return }
+                tv.addSubview(red)
+                let t = ToastView(body: "<div>Static toast test</div>", icon: [15, 9], width: 300)
+                t.frame = CGRect(x: px(16), y: px(150), width: px(300), height: px(t.cssHeight))
+                t.alpha = 1
+                tv.addSubview(t)
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+                    for v in tv.subviews { DebugLog.log("tv sub \(type(of: v)) f=\(v.frame) a=\(v.alpha) op=\(v.layer.opacity) pres=\(String(describing: v.layer.presentation()?.opacity)) tr=\(v.transform) h=\(v.isHidden) anims=\(v.layer.animationKeys() ?? [])") }
+                }
             }
             for i in 0..<8 { DispatchQueue.main.asyncAfter(deadline: .now() + 1 + Double(i) * 1.5) { G.toast("Garden: ready!", "<b>Baker's wheat</b> is now mature.", [15, 9]) } }
         default: break
