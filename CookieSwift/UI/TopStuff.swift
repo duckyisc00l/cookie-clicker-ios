@@ -351,6 +351,8 @@ final class ToastsView: PassView {
             self.addSubview(v)
             self.live.append(v)
             v.run(rise: id % 2 == 0 ? 64 : 112)
+            DebugLog.log("toast v=\(v.frame) h=\(h) win=\(v.convert(v.bounds, to: nil)) inWindow=\(v.window != nil) subs=\(v.subviews.map { "\(type(of: $0)) \($0.frame)" }) siblings=\(self.superview?.subviews.map { "\(type(of: $0)) a=\($0.alpha) h=\($0.isHidden)" } ?? [])")
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1) { DebugLog.log("toast +1s alpha=\(v.alpha) pres=\(String(describing: v.layer.presentation()?.opacity)) frame=\(v.frame)") }
             DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                 v.removeFromSuperview()
                 self?.live.removeAll { $0 === v }
