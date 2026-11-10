@@ -351,3 +351,13 @@ func jsToPrecision(_ v: Double, _ p: Int) -> String {
 
 /// parseInt-like for ids stored as strings
 func jsInt(_ s: String) -> Int? { Int(s) }
+
+/// x|0 in JS: ToInt32 (wraps around, NaN and infinities become 0)
+func jsInt32(_ v: Double) -> Double {
+    if !v.isFinite { return 0 }
+    let t = v.rounded(.towardZero)
+    let m = t.truncatingRemainder(dividingBy: 4294967296)
+    var u = m < 0 ? m + 4294967296 : m
+    if u >= 2147483648 { u -= 4294967296 }
+    return u
+}

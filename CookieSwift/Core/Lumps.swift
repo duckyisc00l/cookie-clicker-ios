@@ -22,9 +22,9 @@ enum Lumps {
     ]
 
     /// The lump ages; the Pantheon's Rigidel shortens them (the minigames mod wraps these getters).
-    static var matureAge: Double { baseMatureAge * Minigames.lumpAgeMult() }
-    static var ripeAge: Double { baseRipeAge * Minigames.lumpAgeMult() }
-    static var overripeAge: Double { baseOverripeAge * Minigames.lumpAgeMult() }
+    static var matureAge: Double { baseMatureAge - Minigames.rigidel() }
+    static var ripeAge: Double { baseRipeAge - Minigames.rigidel() }
+    static var overripeAge: Double { baseOverripeAge - Minigames.rigidel() }
 
     static func canLumps() -> Bool { G.lumpT > 0 || (G.cookiesEarned + G.cookiesReset) >= 1e9 }
 

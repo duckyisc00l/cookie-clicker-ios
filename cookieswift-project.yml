@@ -1,0 +1,76 @@
+# Cookie Clicker, all in Swift. Same bundle ID as the web-view app, so it replaces it and keeps the save.
+name: CookieSwift
+options:
+  bundleIdPrefix: com.duckyisc00l
+  deploymentTarget:
+    iOS: "15.0"
+targets:
+  CookieSwift:
+    type: application
+    platform: iOS
+    sources:
+      - path: CookieSwift
+        excludes:
+          - "Resources/**"
+          - "PORT_NOTES.md"
+          - "Tests/**"
+      - path: CookieSwift/Resources/Content.json
+        buildPhase: resources
+      - path: CookieClicker/Assets.xcassets
+      - path: Shared
+    postCompileScripts:
+      - name: Copy game pictures and sounds
+        basedOnDependencyAnalysis: false
+        script: |
+          set -e
+          DEST="$TARGET_BUILD_DIR/$UNLOCALIZED_RESOURCES_FOLDER_PATH"
+          SRC="$SRCROOT/CookieClicker"
+          mkdir -p "$DEST/override"
+          rsync -a --delete "$SRC/www/img/" "$DEST/img/"
+          rsync -a --delete "$SRC/www/snd/" "$DEST/snd/"
+          rsync -a --delete "$SRC/hd/" "$DEST/hd/"
+          rsync -a --delete "$SRC/mods/minigames/img/" "$DEST/mgimg/"
+          cp "$SRC/mods/icons.png" "$SRC/mods/buildings.png" "$DEST/override/"
+    dependencies:
+      - target: CookieSwiftWidgets
+        embed: true
+    scheme: {}
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.duckyisc00l.cookieclicker
+        PRODUCT_NAME: CookieClicker
+        INFOPLIST_FILE: CookieSwift/Resources/Info.plist
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        MARKETING_VERSION: "2.0.0"
+        CURRENT_PROJECT_VERSION: "20000"
+        ENABLE_USER_SCRIPT_SANDBOXING: "NO"
+        SWIFT_OPTIMIZATION_LEVEL: "-O"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""
+
+  # Live Activity (Lock Screen + Dynamic Island)
+  CookieSwiftWidgets:
+    type: app-extension
+    platform: iOS
+    deploymentTarget: "16.2"
+    sources:
+      - path: Widgets
+        excludes:
+          - "Info.plist"
+      - path: Shared
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.duckyisc00l.cookieclicker.widgets
+        PRODUCT_NAME: CookieClickerWidgets
+        INFOPLIST_FILE: Widgets/Info.plist
+        TARGETED_DEVICE_FAMILY: "1,2"
+        SWIFT_VERSION: "5.0"
+        MARKETING_VERSION: "2.0.0"
+        CURRENT_PROJECT_VERSION: "20000"
+        SKIP_INSTALL: "YES"
+        CODE_SIGNING_ALLOWED: "NO"
+        CODE_SIGNING_REQUIRED: "NO"
+        CODE_SIGN_IDENTITY: ""

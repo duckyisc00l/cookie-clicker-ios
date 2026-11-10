@@ -145,6 +145,7 @@ final class Game {
     var sparkleX = 0.0, sparkleY = 0.0
     let sparklesFrames = 16
     var ticker1 = TickerLine(), ticker2 = TickerLine()
+    var bg = BGState()
     var tickerN = 0
     var recentTips: [String] = []
 

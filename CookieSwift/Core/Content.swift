@@ -50,8 +50,12 @@ extension Game {
             AllMilks[i].rank = milks.count
             milks.append(AllMilks[i])
         }
-        // milk.name='Rank '+romanize(i+1)+' - '+milk.name (only the copies in G.milks)
-        for i in 0..<milks.count { milks[i] = Milk(name: "Rank " + romanize(i + 1) + " - " + milks[i].name, icon: milks[i].icon, type: milks[i].type, pic: milks[i].pic, rank: milks[i].rank) }
+        // milk.name='Rank '+romanize(i+1)+' - '+milk.name; G.milks holds the same objects as G.AllMilks, so both lists change
+        for i in 0..<milks.count {
+            let renamed = Milk(name: "Rank " + romanize(i + 1) + " - " + milks[i].name, icon: milks[i].icon, type: milks[i].type, pic: milks[i].pic, rank: milks[i].rank)
+            if let j = AllMilks.firstIndex(where: { $0.pic == milks[i].pic && $0.type == 0 && $0.rank == milks[i].rank }) { AllMilks[j] = renamed }
+            milks[i] = renamed
+        }
     }
 
     static let AllBGs: [(pic: String, name: String, icon: [Int], order: Double?)] = [
