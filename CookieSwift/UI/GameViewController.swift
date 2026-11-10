@@ -35,6 +35,7 @@ final class GameViewController: UIViewController {
                 else if shot.hasPrefix("popup-") { DebugShots.open(String(shot.dropFirst(6))) }
                 else { G.setScreen(shot) }
             }
+            DebugLog.log("starting loop")
             lastTime = nowMs()
             startLoop()
         }
