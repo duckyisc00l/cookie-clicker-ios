@@ -13,6 +13,7 @@ final class Game {
     let fps = 30.0
     var hasFocus = true
     var w = 320.0, h = 693.0          // the game is laid out 320 px wide, then scaled to the screen
+    var fullH = 693.0                 // including the notch and home bar areas
     var scale = 1.0
 
     // MARK: content
@@ -85,7 +86,7 @@ final class Game {
     var intro = 0
     var milkLevel = 0.0
     var elderWrathD = 0.0
-    var savedToasts: [SavedToast] = []
+    var savedToasts: [(String, Double)] = []   // (HTML, time) like the original
     var savedNews: [(String, Double)] = []
     var volume = 100.0
 
@@ -137,6 +138,10 @@ final class Game {
     var panning = false
     var panTo = 0.0
     var onX = 0.0, onY = 0.0
+    // touch tracking (the touchstart/touchmove handlers on #game)
+    var panFrom = 0.0, fromX = 0.0, fromY = 0.0, velX = 0.0, velY = 0.0
+    var dragging = false
+    let panStep = 90.0
     // particles, sparkles, ticker
     var particles: [Particle] = []
     var pendingParticles: [Particle] = []

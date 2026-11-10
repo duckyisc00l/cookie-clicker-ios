@@ -40,12 +40,10 @@ struct TextStyle {
             let name = bold && italic ? "Arial-BoldItalicMT" : bold ? "Arial-BoldMT" : italic ? "Arial-ItalicMT" : "ArialMT"
             f = UIFont(name: name, size: px(size)) ?? .systemFont(ofSize: px(size))
         }
-        if family == .fancy && (bold || italic) {
-            // the browser fakes bold/italic for a font with only one style
-            var traits: UIFontDescriptor.SymbolicTraits = []
-            if bold { traits.insert(.traitBold) }
-            if italic { traits.insert(.traitItalic) }
-            if let d = f.fontDescriptor.withSymbolicTraits(traits) { f = UIFont(descriptor: d, size: f.pointSize) }
+        if family == .fancy && italic {
+            // the browser slants a font that has no italic face (bold is faked with a stroke, see attributes)
+            let m = CGAffineTransform(a: 1, b: 0, c: 0.2, d: 1, tx: 0, ty: 0)
+            f = UIFont(descriptor: f.fontDescriptor.withMatrix(m), size: f.pointSize)
         }
         if smallCaps {
             let d = f.fontDescriptor.addingAttributes([.featureSettings: [
@@ -276,6 +274,11 @@ enum RichText {
             var a: [NSAttributedString.Key: Any] = [.font: f, .foregroundColor: st.color.withAlphaComponent(st.color.cgColor.alpha * st.alpha)]
             if let sh = st.shadow { a[.shadow] = sh }
             if st.letterSpacing != 0 { a[.kern] = px(st.letterSpacing) }
+            if st.bold && st.family == .fancy {
+                // the browser fakes bold for a font that has no bold face
+                a[.strokeWidth] = -3.0
+                a[.strokeColor] = a[.foregroundColor]
+            }
             // line-height:1 → centre the glyphs in a line as tall as the font size (see paragraph())
             let natural = f.ascender - f.descender
             a[.baselineOffset] = -(natural - f.pointSize * CGFloat(st.lineHeight ?? 1)) / 2
@@ -490,6 +493,13 @@ enum RichText {
                     st.size = 11; st.color = UIColor(css: "#9fff38"); st.shadow = Shadows.cost
                     if classes.contains("cantAfford") { st.color = UIColor(css: "#ff5134"); st.shadow = Shadows.costRed }
                     if classes.contains("neutralCost") { st.color = .white; st.shadow = cur.shadow }
+                    if !classes.contains("otherCost") {
+                        // .cost:before: a little cookie (or heavenly chip) in front
+                        let heavenly = classes.contains("heavenlyCost")
+                        before = { [unowned self] in
+                            self.appendAttachment(Res.image(heavenly ? "img/heavenlyMoney.png" : "img/cookicon.png"), w: 11.2, h: 11.2, kernBefore: 0.4, kernAfter: 0.4)
+                        }
+                    }
                 case "hidden", "debugOnly": hidden += 1; openTags.append(("hidden", false)); return
                 case "chromaFocus": st.color = UIColor(css: "#fcc"); st.shadow = Shadows.top
                 case "title": isBlock = false
@@ -534,7 +544,7 @@ enum RichText {
             if let v = css["padding-right"] { padRight = RichText.length(v, relativeTo: 0) ?? 0 }
 
             // pictures
-            if classes.contains("icon") || classes.contains("tinyIcon") || classes.contains("tinyCookie") || classes.contains("usesIcon") {
+            if classes.contains("icon") || classes.contains("tinyIcon") || classes.contains("tinyCookie") || classes.contains("tinyHeavenly") || classes.contains("usesIcon") {
                 inlinePicture(classes, css)
                 if !selfClosing { openTags.append(("pic", false)); hidden += 1 }
                 return
@@ -565,6 +575,10 @@ enum RichText {
             if let v = css["background-position"] {
                 let p = v.split(separator: " ").map { RichText.length(String($0), relativeTo: 0) ?? 0 }
                 if p.count >= 2 { bx = p[0]; by = p[1] } else if p.count == 1 { bx = p[0] }
+            }
+            if classes.contains("tinyHeavenly") {
+                appendAttachment(Res.image("img/heavenlyMoney.png"), w: 11.2, h: 11.2, kernBefore: 0.4, kernAfter: 0.4)
+                return
             }
             if classes.contains("tinyCookie") {
                 appendAttachment(Res.image("img/cookicon.png"), w: 11.2, h: 11.2, kernBefore: 0.4, kernAfter: 0.4)

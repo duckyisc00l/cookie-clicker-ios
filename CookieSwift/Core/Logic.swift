@@ -513,7 +513,7 @@ extension Game {
                 else { me.locked = 1; lastLocked += 1 }
             }
             if explodeT > -1 { milkLevel += (0 - milkLevel) * 0.02 }
-            else { milkLevel += (min(1, h / 640) - milkLevel) * 0.1 }
+            else { milkLevel += (min(1, fullH / 640) - milkLevel) * 0.1 }
             cookiesD += (cookies - cookiesD) * 0.2
             if abs(cookies - cookiesD) < 0.01 { cookiesD = cookies }
 

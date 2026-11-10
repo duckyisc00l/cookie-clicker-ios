@@ -38,9 +38,11 @@ final class GameViewController: UIViewController {
         guard b.width > 0 else { return }
         K = b.width / 320
         G.w = 320
-        G.h = Double(b.height / K)
         Layout.sat = Double(view.safeAreaInsets.top / K)
         Layout.sab = Double(view.safeAreaInsets.bottom / K)
+        // the game's own area sits between the notch and the home bar (like the original on a phone without them)
+        G.fullH = Double(b.height / K)
+        G.h = G.fullH - Layout.sat - Layout.sab
         if started { root.relayout() }
     }
 
