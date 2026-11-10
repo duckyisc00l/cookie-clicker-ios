@@ -288,7 +288,7 @@ final class TabsView: UIView {
         addSubview(shelfMirror)
         let names = ["Cookie", "Store", "Special", "Stats", "Misc"]
         for (i, n) in G.screenNames.enumerated() {
-            let t = TabView(icon: i, name: names[i])
+            let t = TabView(icon: [0, 2, 1, 3, 4][i], name: names[i])
             t.onTap = { v in
                 if !G.panning {
                     Anim.trigger(v, "plop")

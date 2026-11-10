@@ -22,6 +22,9 @@ final class CookieScreen: GameScreen {
 
     override func build() {
         let W = view.bounds.width, H = view.bounds.height
+        container.subviews.forEach { $0.removeFromSuperview() }
+        container.layer.sublayers?.filter { $0.delegate == nil }.forEach { $0.removeFromSuperlayer() }
+        container.transform = .identity
         container.frame = view.bounds
         container.clipsToBounds = false
         view.addSubview(container)
