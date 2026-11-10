@@ -8,6 +8,7 @@ enum DebugShots {
         case "upgrade": if let u = G.upgrades.first(where: { $0.owned != 0 && $0.pool != "prestige" && $0.pool != "toggle" }) { UpgradeUI.showInfo(u) }
         case "achiev": if let a = G.achievs.first(where: { $0.owned != 0 }) { AchievUI.showInfo(a) }
         case "lump": LumpUI.popup()
+        case "ascend": G.showAscend(2)
         case "toast": G.toast("Test toast", "Something happened", [10, 0])
         default: break
         }

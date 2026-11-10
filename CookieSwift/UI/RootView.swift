@@ -113,6 +113,10 @@ final class RootView: UIView, GameUI {
     func draw() {
         guard built else { return }
         G.drawT += 1
+        // #game.onExplode: no touching, top stuff hidden
+        let exploding = G.explodeT > -1
+        top.alpha = exploding ? 0 : 1
+        isUserInteractionEnabled = !exploding
         if G.onAscend > 0 {
         } else {
             top.drawCounters()

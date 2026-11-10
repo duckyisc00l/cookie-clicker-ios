@@ -122,8 +122,9 @@ final class PopupView: UIView {
     required init?(coder: NSCoder) { fatalError() }
     /// margin:60px 10px 44px 10px, plus the safe-area adjustments the web version made
     func targetFrame(in b: CGRect) -> CGRect {
-        if options.fullPopup { return b }
         let top = px(60 + Layout.sat), bottom = px(44 + Layout.sab)
+        // .fullPopup has no side margins (its top and bottom ones come from the safe-area rules)
+        if options.fullPopup { return CGRect(x: 0, y: top, width: b.width, height: b.height - top - bottom) }
         return CGRect(x: px(10), y: top, width: b.width - px(20), height: b.height - top - bottom)
     }
     func relayout() {

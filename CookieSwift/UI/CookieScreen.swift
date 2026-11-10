@@ -183,6 +183,9 @@ final class CookieScreen: GameScreen {
             root?.setBackScale(max(0.8, (G.bigCookieSize - 1) * 0.5 + 1))
             root?.rain.extraScale = max(0.8, (1 - G.bigCookieSize) * 0.5 + 1 + 0.1)
         }
+        // the explosion before ascending hides the cookie
+        container.alpha = G.explodeT > -1 ? 0 : 1
+        quickBox?.alpha = G.explodeT > -1 ? 0 : 1
         updateQuickButtons()
         lump?.update()
         drawShimmers()
@@ -432,8 +435,9 @@ final class QuickButton: TapView {
         status = v
         switch v {
         case 1:
-            alpha = 0.2
-            isUserInteractionEnabled = false
+            // prestigeStatus1 (on a .quickButton: still fully visible and pressable)
+            alpha = 1
+            isUserInteractionEnabled = true
             slot.image = Res.sprite("img/ascendSlot.png", x: 88, y: 0, w: 88, h: 88)
             iconV.alpha = 1
             Anim.squish(iconV, on: false)
