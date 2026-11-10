@@ -19,6 +19,8 @@ struct TextStyle {
     var lineHeight: Double? = nil   // in multiples of the font size; nil = 1 (lib/style.css body{line-height:1})
     var textIndent: Double = 0
     var nowrap = false
+    /// padding of <p> (4px; #statsData p has 2px)
+    var pPad: Double = 4
 
     static let ticker: TextStyle = {
         var s = TextStyle(); s.family = .fancy; s.size = 14; s.color = .white; s.nowrap = true
@@ -85,7 +87,7 @@ enum RichText {
 
     /// Lays out `html` for a box `width` CSS px wide (nil = no wrapping)
     static func render(_ html: String, style: TextStyle, width: Double? = nil) -> NSAttributedString {
-        let key = "\(style.family)|\(style.size)|\(style.bold)|\(style.color.hashValue)|\(style.align.rawValue)|\(width ?? -1)|\(style.shadow?.shadowOffset.width ?? -9)|\(style.alpha)|\(style.smallCaps)|\(K)|\(html)"
+        let key = "\(style.family)|\(style.size)|\(style.bold)|\(style.color.hashValue)|\(style.align.rawValue)|\(width ?? -1)|\(style.shadow?.shadowOffset.width ?? -9)|\(style.alpha)|\(style.smallCaps)|\(style.pPad)|\(style.textIndent)|\(style.lineHeight ?? 0)|\(style.nowrap)|\(style.italic)|\(style.letterSpacing)|\(K)|\(html)"
         if let c = cache[key] { return c }
         let r = Builder(style: style, width: width).build(html)
         if cache.count > 1500 { cache.removeAll() }
@@ -276,7 +278,7 @@ enum RichText {
             if st.letterSpacing != 0 { a[.kern] = px(st.letterSpacing) }
             if st.bold && st.family == .fancy {
                 // the browser fakes bold for a font that has no bold face
-                a[.strokeWidth] = -3.0
+                a[.strokeWidth] = -4.0
                 a[.strokeColor] = a[.foregroundColor]
             }
             // line-height:1 → centre the glyphs in a line as tall as the font size (see paragraph())
@@ -479,7 +481,7 @@ enum RichText {
             case "small": st.size *= 0.8
             case "big": st.size *= 1.2
             case "u": break
-            case "p": padTop = 4; padBottom = 4; indent = 8
+            case "p": padTop = cur.pPad; padBottom = cur.pPad; indent = 8
             case "h3":
                 st.family = .fancy; st.size = 15; st.smallCaps = true; align = .center; padTop = 8; padBottom = 8
             case "q":

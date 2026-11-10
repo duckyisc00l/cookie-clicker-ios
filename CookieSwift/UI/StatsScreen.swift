@@ -142,7 +142,7 @@ final class StatsScreen: GameScreen {
 
         // the numbers
         let statsBox = DoilyBox()
-        let stats = RichLabel(TextStyle.base(11)); stats.style.shadow = Shadows.body
+        let stats = RichLabel(TextStyle.base(11)); stats.style.shadow = Shadows.body; stats.style.pPad = 2
         statsBox.addSubview(stats)
         c.addSubview(statsBox)
         stats.html = StatsScreen.statsHTML()
@@ -151,10 +151,10 @@ final class StatsScreen: GameScreen {
         // upgrades
         let upH = SmallHeader()
         func upText() -> String { "<p>Upgrades owned: <b>\(B(Double(G.upgradesN)))/\(B(Double(G.upgradesTotal)))</b> (\(B(Double(G.upgradesN) / Double(G.upgradesTotal) * 100, 1))%)</p>" }
-        upH.label.html = upText()
+        upH.label.style.pPad = 2; upH.label.html = upText()
         c.addSubview(upH)
         let upBox = DoilyBox()
-        let recentUpL = RichLabel(TextStyle.base(11)); recentUpL.style.shadow = Shadows.body; recentUpL.html = "<p>Recent upgrades:</p>"
+        let recentUpL = RichLabel(TextStyle.base(11)); recentUpL.style.shadow = Shadows.body; recentUpL.style.pPad = 2; recentUpL.html = "<p>Recent upgrades:</p>"
         let recentUp = IconGrid()
         let viewUp = FullButton(text: "View upgrades", icon: [29, 30])
         viewUp.onTap = { _ in StatsScreen.upgradesPopup() }
@@ -164,16 +164,16 @@ final class StatsScreen: GameScreen {
         // achievements
         let acH = SmallHeader()
         func acText() -> String { "<p>Achievements unlocked: <b>\(B(Double(G.achievsN)))/\(B(Double(G.achievsTotal)))</b> (\(B(Double(G.achievsN) / Double(G.achievsTotal) * 100, 1))%)</p>" }
-        acH.label.html = acText()
+        acH.label.style.pPad = 2; acH.label.html = acText()
         c.addSubview(acH)
         let acBox = DoilyBox()
-        let milkL = RichLabel(TextStyle.base(11)); milkL.style.shadow = Shadows.body
+        let milkL = RichLabel(TextStyle.base(11)); milkL.style.shadow = Shadows.body; milkL.style.pPad = 2
         func milkHTML() -> String {
             let milk = G.milks[min(G.milks.count - 1, G.achievsN / 25)]
             return "<p>Milk: <span class=\"tinyIcon\" style=\"background-position:\(-milk.icon[0] * 48)px \(-milk.icon[1] * 48)px;\"></span> <b>\(milk.name)</b></p><div style=\"font-size:70%;margin:4px 0px;text-align:center;opacity:0.75;\">(Milk is gained with each achievement. May unlock unique upgrades over time.)</div>"
         }
         milkL.html = milkHTML()
-        let recentAcL = RichLabel(TextStyle.base(11)); recentAcL.style.shadow = Shadows.body; recentAcL.html = "<p>Recent achievements:</p>"
+        let recentAcL = RichLabel(TextStyle.base(11)); recentAcL.style.shadow = Shadows.body; recentAcL.style.pPad = 2; recentAcL.html = "<p>Recent achievements:</p>"
         let recentAc = IconGrid()
         let viewAc = FullButton(text: "View achievements", icon: [29, 7])
         viewAc.onTap = { _ in StatsScreen.achievsPopup() }

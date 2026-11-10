@@ -171,7 +171,7 @@ final class HalfButton: TapView {
         label.frame = CGRect(x: px(6), y: px(20), width: px(w - 12), height: px(lh))
         if let i = icon {
             // tinyIcon at scale(1.5), 8px left of where the text starts, behind it
-            let firstLine = RichText.plain(label.html).components(separatedBy: "\n").first ?? ""
+            let firstLine = RichText.plain(label.html.components(separatedBy: "<div").first ?? "")
             let tw = Double(RichText.size(RichText.render(firstLine, style: label.style, width: nil), width: nil).width)
             let startX = 6 + (w - 12 - tw) / 2
             i.bounds = CGRect(x: 0, y: 0, width: px(48), height: px(48))
