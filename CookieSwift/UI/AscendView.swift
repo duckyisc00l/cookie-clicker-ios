@@ -26,6 +26,7 @@ final class AscendView {
     }
 
     private func build(_ c: PopupContent) {
+        DebugLog.log("ascend build start")
         c.isScrollEnabled = false
         c.alwaysBounceVertical = false
         // the tree
@@ -75,6 +76,7 @@ final class AscendView {
         PulseAnimator.shared.start { [weak self] img in
             self?.links.forEach { $0.1.backgroundColor = UIColor(patternImage: img) }
         }
+        DebugLog.log("ascend tree made \(icons.count) icons \(links.count) links")
         c.add(tree) { [unowned self] w in
             DispatchQueue.main.async { self.fit() }
             return Double(c.bounds.height / K)
@@ -114,8 +116,11 @@ final class AscendView {
             btn.frame = CGRect(x: px(W - 6 - tw), y: px(H - 6 - bh), width: px(tw), height: px(bh))
             sub.frame = CGRect(x: 0, y: btn.bounds.height - px(4 + 10), width: btn.bounds.width, height: px(10))
             p.addSubview(btn)
+            DebugLog.log("ascend overlay")
             self.updateTree()
+            DebugLog.log("ascend updated")
             self.fit()
+            DebugLog.log("ascend fitted")
         }
     }
 

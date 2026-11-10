@@ -42,13 +42,16 @@ final class PopupsView: UIView {
     func open(_ o: PopupOptions) -> PopupView {
         if o.replace { close(nil) }
         G.particlesClear()
+        DebugLog.log("popup open")
         let p = PopupView(o)
+        DebugLog.log("popup built")
         stack.last?.isUserInteractionEnabled = false
         addSubview(p)
         stack.append(p)
         isHidden = false
         p.frame = p.targetFrame(in: bounds)
         p.relayout()
+        DebugLog.log("popup laid out")
         if let a = o.introAnim { if a == "ascendPopupAnimIn" { p.ascendIn() } }
         else if G.getSet("lowMotion") == 0 { Anim.fadeOpen(p) }
         PlaySound("snd/press.mp3", 0.15)
