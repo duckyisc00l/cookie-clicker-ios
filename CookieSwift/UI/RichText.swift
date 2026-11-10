@@ -608,7 +608,7 @@ enum RichText {
             if let v = css["padding-right"] { padRight = RichText.length(v, relativeTo: 0) ?? 0 }
 
             // pictures
-            if classes.contains("icon") || classes.contains("tinyIcon") || classes.contains("tinyCookie") || classes.contains("tinyHeavenly") || classes.contains("usesIcon") {
+            if classes.contains("icon") || classes.contains("gardenSeedTiny") || classes.contains("tinyIcon") || classes.contains("tinyCookie") || classes.contains("tinyHeavenly") || classes.contains("usesIcon") {
                 inlinePicture(classes, css)
                 if !selfClosing { openTags.append(("pic", false)); hidden += 1 }
                 return

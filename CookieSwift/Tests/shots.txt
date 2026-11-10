@@ -1,1 +1,1 @@
-cookie store upgrades special stats misc popup-building popup-upgrade popup-achiev popup-lump popup-ascend popup-grimoire popup-gardenplay popup-market popup-pantheontip popup-toast
+popup-gardenplay popup-toast
