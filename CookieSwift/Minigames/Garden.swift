@@ -910,6 +910,7 @@ final class GardenScreen: UIView, MinigameScreen {
         inner.addSubview(panelNoise); inner.addSubview(panelShade)
         panel.addSubview(inner)
         panel.addSubview(panelBorder)
+        addSubview(panel)
         var ls = TextStyle(); ls.family = .merriweather; ls.size = 14; ls.color = .white; ls.align = .center; ls.shadow = Shadows.make(0, 1, 4); ls.nowrap = true
         toolsLabel.style = ls; seedsLabel.style = ls
         toolsLabel.html = "Tools"
