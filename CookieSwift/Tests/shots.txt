@@ -1,1 +1,1 @@
-cookie store upgrades special stats popup-building popup-ascend popup-gardenplay popup-grimoire
+store popup-building popup-gardenplay cookie
