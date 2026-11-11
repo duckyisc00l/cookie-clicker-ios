@@ -32,6 +32,7 @@ targets:
           mkdir -p "$DEST/hd"
           rm -f "$DEST/hd/"*.webp
           cp "$SRC/hd/manifest.json" "$SRC/hd/perfectCookie.webp" "$DEST/hd/"
+          rsync -a --delete "$SRC/sharp/" "$DEST/sharp/"
           rsync -a --delete "$SRC/mods/minigames/img/" "$DEST/mgimg/"
           cp "$SRC/mods/icons.png" "$SRC/mods/buildings.png" "$DEST/override/"
     dependencies:

@@ -1,0 +1,754 @@
+{
+"img/adless.png": [
+150,
+150
+],
+"img/ascendSlot.png": [
+264,
+88
+],
+"img/barH.png": [
+640,
+57
+],
+"img/barIndent.png": [
+48,
+48
+],
+"img/bgBW.jpg": [
+512,
+512
+],
+"img/bgBlack.jpg": [
+512,
+512
+],
+"img/bgBlue.jpg": [
+512,
+512
+],
+"img/bgCandy.jpg": [
+512,
+512
+],
+"img/bgChoco.jpg": [
+512,
+512
+],
+"img/bgChocoDark.jpg": [
+512,
+512
+],
+"img/bgCoarse.jpg": [
+512,
+512
+],
+"img/bgFoil.jpg": [
+512,
+512
+],
+"img/bgGold.jpg": [
+512,
+512
+],
+"img/bgMint.jpg": [
+512,
+512
+],
+"img/bgMoney.jpg": [
+600,
+600
+],
+"img/bgPaint.jpg": [
+512,
+512
+],
+"img/bgPink.jpg": [
+512,
+512
+],
+"img/bgPurple.jpg": [
+512,
+512
+],
+"img/bgRed.jpg": [
+512,
+512
+],
+"img/bgSilver.jpg": [
+512,
+512
+],
+"img/bgSky.jpg": [
+512,
+512
+],
+"img/bgSnowy.jpg": [
+512,
+512
+],
+"img/bgSpectrum.jpg": [
+512,
+512
+],
+"img/bgStars.jpg": [
+512,
+512
+],
+"img/bgWhite.jpg": [
+512,
+512
+],
+"img/bgYellowBlue.jpg": [
+512,
+512
+],
+"img/bottomBar.jpg": [
+346,
+40
+],
+"img/bottomShelf.png": [
+640,
+146
+],
+"img/brokenCookie.png": [
+2560,
+256
+],
+"img/brokenCookieHalo.png": [
+192,
+192
+],
+"img/bunnies.png": [
+384,
+192
+],
+"img/cookicon.png": [
+16,
+16
+],
+"img/cookieShadow.png": [
+64,
+64
+],
+"img/cookieShower1.png": [
+512,
+512
+],
+"img/cookieShower2.png": [
+512,
+512
+],
+"img/cookieShower3.png": [
+512,
+512
+],
+"img/cursor.png": [
+32,
+32
+],
+"img/darkNoise.jpg": [
+512,
+512
+],
+"img/doilyBorder.png": [
+54,
+54
+],
+"img/dragon.png": [
+864,
+96
+],
+"img/dragonBG.png": [
+300,
+300
+],
+"img/dragonBG2.png": [
+300,
+300
+],
+"img/familiars.png": [
+384,
+192
+],
+"img/flare.png": [
+128,
+128
+],
+"img/frameBorder.png": [
+9,
+9
+],
+"img/frostedReindeer.png": [
+167,
+212
+],
+"img/glint.jpg": [
+32,
+32
+],
+"img/goldCookie.png": [
+96,
+96
+],
+"img/goldCookieWreath.png": [
+96,
+96
+],
+"img/grandmas1.jpg": [
+256,
+256
+],
+"img/grandmas2.jpg": [
+256,
+256
+],
+"img/grandmas3.jpg": [
+256,
+256
+],
+"img/heartStorm.png": [
+512,
+512
+],
+"img/heartStormWrath.png": [
+512,
+512
+],
+"img/hearts.png": [
+768,
+192
+],
+"img/heavenRing1.jpg": [
+128,
+128
+],
+"img/heavenRing2.jpg": [
+128,
+128
+],
+"img/heavenlyMoney.png": [
+16,
+16
+],
+"img/icon.png": [
+96,
+96
+],
+"img/marbleSlabs.png": [
+692,
+392
+],
+"img/marbleSolid.jpg": [
+692,
+692
+],
+"img/milkBanana.png": [
+240,
+240
+],
+"img/milkBlack.png": [
+240,
+240
+],
+"img/milkBlackcurrant.png": [
+240,
+240
+],
+"img/milkBlood.png": [
+240,
+240
+],
+"img/milkBlueFire.png": [
+240,
+240
+],
+"img/milkBlueberry.png": [
+240,
+240
+],
+"img/milkCaramel.png": [
+240,
+240
+],
+"img/milkCherry.png": [
+240,
+240
+],
+"img/milkChocolate.png": [
+240,
+240
+],
+"img/milkCoconut.png": [
+240,
+240
+],
+"img/milkCoffee.png": [
+240,
+240
+],
+"img/milkDragonfruit.png": [
+240,
+240
+],
+"img/milkFire.png": [
+240,
+240
+],
+"img/milkGold.png": [
+240,
+240
+],
+"img/milkGreenFire.png": [
+240,
+240
+],
+"img/milkHoney.png": [
+240,
+240
+],
+"img/milkLicorice.png": [
+240,
+240
+],
+"img/milkLime.png": [
+240,
+240
+],
+"img/milkMaple.png": [
+240,
+240
+],
+"img/milkMelon.png": [
+240,
+240
+],
+"img/milkMint.png": [
+240,
+240
+],
+"img/milkOrange.png": [
+240,
+240
+],
+"img/milkPlain.png": [
+240,
+240
+],
+"img/milkRaspberry.png": [
+240,
+240
+],
+"img/milkRose.png": [
+240,
+240
+],
+"img/milkSoy.png": [
+240,
+240
+],
+"img/milkSpiced.png": [
+240,
+240
+],
+"img/milkStars.png": [
+240,
+240
+],
+"img/milkStrawberry.png": [
+240,
+240
+],
+"img/milkTea.png": [
+240,
+240
+],
+"img/milkVanilla.png": [
+240,
+240
+],
+"img/milkZebra.png": [
+240,
+240
+],
+"img/nest.png": [
+304,
+151
+],
+"img/orteil.png": [
+434,
+296
+],
+"img/orteilBubble.png": [
+240,
+64
+],
+"img/panelFullBottom.png": [
+512,
+2
+],
+"img/panelFullTop.png": [
+512,
+2
+],
+"img/panelHorizontal.png": [
+512,
+16
+],
+"img/panelVertical.png": [
+16,
+512
+],
+"img/parade.png": [
+640,
+64
+],
+"img/pinLeft.png": [
+60,
+71
+],
+"img/pinMid.png": [
+171,
+71
+],
+"img/pinRight.png": [
+45,
+71
+],
+"img/pingDot.png": [
+16,
+16
+],
+"img/researchBar.jpg": [
+122,
+32
+],
+"img/ripple.png": [
+64,
+64
+],
+"img/santa.png": [
+1440,
+96
+],
+"img/shadedBackdrop.png": [
+128,
+128
+],
+"img/shadedEdges.png": [
+512,
+512
+],
+"img/shadedGradDown.png": [
+20,
+20
+],
+"img/shadedGradUp.png": [
+20,
+20
+],
+"img/shine.png": [
+128,
+128
+],
+"img/shinyWrinkler.png": [
+100,
+200
+],
+"img/shinyWrinklerBits.png": [
+800,
+200
+],
+"img/smallCookies.png": [
+512,
+64
+],
+"img/smallDollars.png": [
+512,
+64
+],
+"img/snow2.jpg": [
+512,
+512
+],
+"img/snow2Wrath.jpg": [
+512,
+512
+],
+"img/sparkles.jpg": [
+2048,
+128
+],
+"img/splashscreen.png": [
+512,
+512
+],
+"img/starbg.jpg": [
+1024,
+1024
+],
+"img/tabIcons.png": [
+896,
+256
+],
+"img/trimBottom.png": [
+640,
+118
+],
+"img/trimTop.png": [
+640,
+118
+],
+"img/trimTopNoLeft.png": [
+640,
+118
+],
+"img/winterWrinkler.png": [
+100,
+200
+],
+"img/woodPanels.png": [
+640,
+320
+],
+"img/wrathCookie.png": [
+96,
+96
+],
+"img/wrathCookieWreath.png": [
+96,
+96
+],
+"img/wrinkler.png": [
+100,
+200
+],
+"img/wrinklerBits.png": [
+800,
+200
+],
+"img/wrinklerBlink.png": [
+100,
+200
+],
+"img/wrinklerGooglies.png": [
+100,
+200
+],
+"mgimg/BGgarden.jpg": [
+512,
+128
+],
+"mgimg/BGgrimoire.jpg": [
+512,
+128
+],
+"mgimg/BGmarket.jpg": [
+512,
+128
+],
+"mgimg/BGpantheon.jpg": [
+512,
+128
+],
+"mgimg/ascendBox.png": [
+344,
+163
+],
+"mgimg/ascendInfo.png": [
+308,
+94
+],
+"mgimg/blackGradient.png": [
+2,
+640
+],
+"mgimg/blackGradientSmallTop.png": [
+2,
+64
+],
+"mgimg/bracketPanelLeftS.png": [
+16,
+36
+],
+"mgimg/bracketPanelRightS.png": [
+18,
+36
+],
+"mgimg/darkNoiseTopBar.jpg": [
+512,
+64
+],
+"mgimg/empty.png": [
+1,
+1
+],
+"mgimg/featherLeft.png": [
+39,
+23
+],
+"mgimg/featherRight.png": [
+39,
+23
+],
+"mgimg/gardenPlants.png": [
+240,
+1728
+],
+"mgimg/gardenPlots.png": [
+160,
+40
+],
+"mgimg/gardenTip.png": [
+120,
+153
+],
+"mgimg/imperfectCookie.png": [
+512,
+512
+],
+"mgimg/infoBG.png": [
+16,
+16
+],
+"mgimg/infoBGfade.png": [
+16,
+16
+],
+"mgimg/levelUp.png": [
+33,
+19
+],
+"mgimg/linkPulse.png": [
+32,
+8
+],
+"mgimg/mapBG.jpg": [
+600,
+600
+],
+"mgimg/money.png": [
+16,
+16
+],
+"mgimg/panelBG.png": [
+256,
+256
+],
+"mgimg/panelGradientBottom.png": [
+16,
+64
+],
+"mgimg/panelGradientLeft.png": [
+64,
+16
+],
+"mgimg/panelGradientRight.png": [
+64,
+16
+],
+"mgimg/panelGradientTop.png": [
+16,
+64
+],
+"mgimg/panelMenu3.png": [
+200,
+192
+],
+"mgimg/pieFill.png": [
+864,
+384
+],
+"mgimg/prestigeBar.jpg": [
+128,
+8
+],
+"mgimg/prestigeBarCap.png": [
+8,
+8
+],
+"mgimg/roundedPanelBG.png": [
+478,
+32
+],
+"mgimg/roundedPanelBGS.png": [
+478,
+36
+],
+"mgimg/roundedPanelLeft.png": [
+17,
+32
+],
+"mgimg/roundedPanelRight.png": [
+17,
+32
+],
+"mgimg/selectTarget.png": [
+60,
+60
+],
+"mgimg/shadedBorders.png": [
+256,
+256
+],
+"mgimg/shadedBordersSoft.png": [
+256,
+256
+],
+"mgimg/spellBG.png": [
+240,
+222
+],
+"mgimg/spinnyBig.png": [
+100,
+100
+],
+"mgimg/spinnySmall.png": [
+100,
+100
+],
+"mgimg/storeTile.jpg": [
+300,
+256
+],
+"mgimg/sugarLump.png": [
+16,
+16
+],
+"mgimg/tinyEyeOff.png": [
+14,
+14
+],
+"mgimg/tinyEyeOn.png": [
+14,
+14
+],
+"mgimg/turnInto.png": [
+20,
+22
+],
+"mgimg/upgradeFrame.png": [
+180,
+120
+],
+"mgimg/upgradeHighlight.jpg": [
+96,
+96
+],
+"mgimg/upgradeHighlight.png": [
+96,
+96
+],
+"mgimg/upgradeSelector.png": [
+12,
+12
+],
+"override/buildings.png": [
+256,
+1600
+],
+"override/icons.png": [
+1968,
+1776
+]
+}

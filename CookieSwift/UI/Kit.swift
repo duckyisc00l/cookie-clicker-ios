@@ -76,6 +76,12 @@ enum Res {
               let o = try? JSONSerialization.jsonObject(with: d) as? [String: [Double]] else { return [:] }
         return o
     }()
+    /// sharper copies made by tools/sharpen.py (classic Lanczos resizing + unsharp mask, no AI), by app path
+    private static let sharpManifest: [String: [Double]] = {
+        guard let u = url("sharp/manifest.json"), let d = try? Data(contentsOf: u),
+              let o = try? JSONSerialization.jsonObject(with: d) as? [String: [Double]] else { return [:] }
+        return o
+    }()
     /// the only sharper picture kept: the big cookie
     private static let hdKept: Set<String> = ["perfectCookie.png"]
     /// The app's own versions of some pictures (new buildings and icons) replace the game's.
@@ -95,6 +101,10 @@ enum Res {
         if img == nil {
             let candidates = overrides.contains(path) ? ["override/" + file, path] : [path, "mgimg/" + file]
             for c in candidates {
+                if let size = sharpManifest[c], let u = url("sharp/" + (c as NSString).deletingPathExtension + ".webp"),
+                   let data = try? Data(contentsOf: u), let raw = UIImage(data: data), let cg = raw.cgImage {
+                    img = UIImage(cgImage: cg, scale: CGFloat(cg.width) / CGFloat(size[0]), orientation: .up); break
+                }
                 if let u = url(c), let raw = UIImage(contentsOfFile: u.path), let cg = raw.cgImage {
                     img = UIImage(cgImage: cg, scale: 1, orientation: .up); break
                 }
