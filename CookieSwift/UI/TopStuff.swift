@@ -345,7 +345,7 @@ final class ToastsView: PassView {
             else { str = body }
             G.savedToasts.insert((str, nowMs()), at: 0)
             if G.savedToasts.count > 50 { G.savedToasts.removeLast() }
-            let v = ToastView(body: body, icon: icon, width: Double(self.bounds.width / K) - 32)
+            let v = ToastView(body: body, icon: icon, width: Double((self.bounds.width > 0 ? self.bounds.width : UIScreen.main.bounds.width) / K) - 32)
             let h = v.cssHeight
             v.frame = CGRect(x: px(16), y: self.bounds.height - px(h), width: self.bounds.width - px(32), height: px(h))
             self.addSubview(v)

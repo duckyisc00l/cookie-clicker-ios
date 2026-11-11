@@ -1,1 +1,1 @@
-store popup-building popup-gardenplay cookie
+store upgrades popup-toast popup-building

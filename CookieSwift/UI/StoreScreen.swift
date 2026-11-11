@@ -52,7 +52,7 @@ final class StoreScreen: GameScreen {
             tabs[id] = t
         }
         // #storeOptions: bottom right, padding 12px
-        options = UIView(frame: CGRect(x: W - px(12 + 172), y: H - px(12 + 46), width: px(172), height: px(46)))
+        options = UIView(frame: CGRect(x: W - px(12 + 160), y: H - px(12 + 46), width: px(160), height: px(46)))
         view.addSubview(options)
         // .sectionTrimOverlay.noLeft: the gilded trim over the list's top and bottom edges
         let trimTop = PicView("img/trimTopNoLeft.png")
@@ -105,18 +105,18 @@ final class StoreScreen: GameScreen {
         for r in buildingRows { r.redraw() }
         // the buy/sell amount buttons
         func bulk(_ text: String, _ key: String, _ width: Double, _ x: Double, _ y: Double, _ act: @escaping () -> Void) {
-            let b = CCButton(text, look: .wood, font: bulkFont(), padding: UIEdgeInsets(top: 4, left: 8, bottom: 4, right: 8))
-            b.frame = CGRect(x: px(x + 2), y: px(y + 2), width: px(width), height: px(19))
+            let b = CCButton(text, look: .wood, font: bulkFont(), padding: UIEdgeInsets(top: 6, left: 2, bottom: 6, right: 2))
+            b.frame = CGRect(x: px(x), y: px(y), width: px(width), height: px(23))
             b.onTap = { v in act(); Anim.trigger(v, "plop"); PlaySound("snd/clickb2.mp3", 0.75) }
             options.addSubview(b)
             bulkButtons[key] = b
         }
         bulk("Buying", "Buy", 96, 0, 0) { [weak self] in self?.setBulk(G.bulkBuy, 1) }
-        bulk("1", "1", 32, 100, 0) { [weak self] in self?.setBulk(1, G.bulkMode) }
-        bulk("10", "10", 32, 136, 0) { [weak self] in self?.setBulk(10, G.bulkMode) }
+        bulk("1", "1", 32, 96, 0) { [weak self] in self?.setBulk(1, G.bulkMode) }
+        bulk("10", "10", 32, 128, 0) { [weak self] in self?.setBulk(10, G.bulkMode) }
         bulk("Selling", "Sell", 96, 0, 23) { [weak self] in self?.setBulk(G.bulkBuy, -1) }
-        bulk("100", "100", 32, 100, 23) { [weak self] in self?.setBulk(100, G.bulkMode) }
-        bulk("Max", "Max", 32, 136, 23) { [weak self] in self?.setBulk(10000, G.bulkMode) }
+        bulk("100", "100", 32, 96, 23) { [weak self] in self?.setBulk(100, G.bulkMode) }
+        bulk("Max", "Max", 32, 128, 23) { [weak self] in self?.setBulk(10000, G.bulkMode) }
         setBulk(G.bulkBuy, G.bulkMode)
     }
     private func bulkFont() -> TextStyle {
@@ -167,7 +167,7 @@ final class StoreScreen: GameScreen {
         G.doUnlocks()
         refreshUpgrades(force: true)
         let b = CCButton("Buy all", look: .wood, font: bulkFont())
-        b.frame = CGRect(x: px(172 - 96 - 2 + 2 - 2), y: px(23 + 2), width: px(96), height: px(19))
+        b.frame = CGRect(x: px(160 - 96), y: px(23), width: px(96), height: px(23))
         b.onTap = { v in
             Anim.trigger(v, "plop")
             PlaySound("snd/clickb2.mp3", 0.75)

@@ -862,6 +862,42 @@ final class RichLabel: UIView {
     }
     var textSize: CGSize { RichText.size(text, width: style.nowrap ? nil : Double(bounds.width / K)) }
     override func draw(_ rect: CGRect) {
+        // Fake-bold text is a fill plus an outline of the same colour. Each of the two leaves its own shadow, and the
+        // outline's shadow lands on the fill, which looked like a dark line inside every letter. Draw the letters
+        // once into a layer and give the whole layer one shadow, as a browser does.
+        if let ctx = UIGraphicsGetCurrentContext(), let (stripped, sh) = RichLabel.sharedShadow(text) {
+            ctx.saveGState()
+            ctx.setShadow(offset: sh.shadowOffset, blur: sh.shadowBlurRadius, color: (sh.shadowColor as? UIColor)?.cgColor)
+            ctx.beginTransparencyLayer(auxiliaryInfo: nil)
+            drawBody(stripped)
+            ctx.endTransparencyLayer()
+            ctx.restoreGState()
+        } else {
+            drawBody(text)
+        }
+    }
+    /// the text without its shadows, and that shadow, when the text has outlined (fake-bold) letters and one shadow for all
+    private static func sharedShadow(_ t: NSAttributedString) -> (NSAttributedString, NSShadow)? {
+        let all = NSRange(location: 0, length: t.length)
+        var stroked = false
+        t.enumerateAttribute(.strokeWidth, in: all) { v, _, stop in if let n = v as? NSNumber, n.doubleValue != 0 { stroked = true; stop.pointee = true } }
+        guard stroked else { return nil }
+        var first: NSShadow? = nil
+        var same = true
+        t.enumerateAttributes(in: all) { attrs, r, stop in
+            let str = (t.string as NSString).substring(with: r)
+            if str.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && attrs[.attachment] == nil { return }
+            guard let sh = attrs[.shadow] as? NSShadow else { same = false; stop.pointee = true; return }
+            if let f = first {
+                if f.shadowOffset != sh.shadowOffset || f.shadowBlurRadius != sh.shadowBlurRadius || !((f.shadowColor as? UIColor)?.isEqual(sh.shadowColor) ?? false) { same = false; stop.pointee = true }
+            } else { first = sh }
+        }
+        guard same, let sh = first else { return nil }
+        let m = NSMutableAttributedString(attributedString: t)
+        m.removeAttribute(.shadow, range: all)
+        return (m, sh)
+    }
+    private func drawBody(_ text: NSAttributedString) {
         if style.nowrap {
             // one line: place it ourselves (alignment needs a width)
             let w = text.boundingRect(with: CGSize(width: CGFloat.greatestFiniteMagnitude, height: .greatestFiniteMagnitude), options: [.usesLineFragmentOrigin, .usesFontLeading], context: nil).width
