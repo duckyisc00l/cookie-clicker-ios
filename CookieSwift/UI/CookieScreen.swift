@@ -31,7 +31,8 @@ final class CookieScreen: GameScreen {
         container.clipsToBounds = false
         view.addSubview(container)
         // the quick buttons, bottom right
-        let qb = PassView(frame: CGRect(x: W, y: H, width: 0, height: 0))
+        // as big as the screen: a finger only reaches buttons inside their parent's frame
+        let qb = PassView(frame: CGRect(x: 0, y: 0, width: W, height: H))
         qb.clipsToBounds = false
         view.addSubview(qb)
         quickBox = qb
@@ -277,7 +278,7 @@ final class CookieScreen: GameScreen {
             }
             let b = QuickButton(icon: icon)
             // right/bottom offsets of the 48px box, then scale(0.5) about its centre
-            b.center = CGPoint(x: -px(pos[0] + 5 + 24), y: -px(pos[1] + 5 + 24))
+            b.center = CGPoint(x: box.bounds.width - px(pos[0] + 5 + 24), y: box.bounds.height - px(pos[1] + 5 + 24))
             b.onTap = { [weak b] _ in
                 guard let b = b else { return }
                 if CookieScreen.quickButtonClick(name) {

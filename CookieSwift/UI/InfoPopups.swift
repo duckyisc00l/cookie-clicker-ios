@@ -309,8 +309,8 @@ enum LumpUI {
             let holder = UIView()
             holder.addSubview(icon)
             icon.transform = CGAffineTransform(scaleX: 1.5, y: 1.5)
-            c.add(holder, marginTop: 4) { _ in
-                icon.center = CGPoint(x: holder.bounds.midX, y: px(36))
+            c.add(holder, marginTop: 4) { w in
+                icon.center = CGPoint(x: px(w / 2), y: px(36))
                 return 72
             }
             c.html("<div style=\"text-align:center;\"><p>You have <b>\(B(G.lumps)) sugar lump\(G.lumps == 1 ? "" : "s")</b>.</p><p>\(status)</p>\(typeText.isEmpty ? "" : "<p>\(typeText)</p>")</div>", marginLeft: 4, marginRight: 4)

@@ -37,6 +37,17 @@ enum DebugShots {
                 G.onX = G.w / 2 + 90; G.onY = G.h / 2 - 70
                 if G.bigCookieState != 1 { G.clickBigCookie(x: G.onX, y: G.onY) }
             }
+        case "quicktap":
+            // is a finger on the power clicks button sent to that button?
+            DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
+                guard let w = UIApplication.shared.connectedScenes.compactMap({ ($0 as? UIWindowScene)?.windows.first }).first else { return }
+                func find(_ v: UIView) -> UIView? { if v is QuickButton { return v }; for c in v.subviews { if let f = find(c) { return f } }; return nil }
+                if let q = find(w) {
+                    let p = q.convert(CGPoint(x: q.bounds.midX, y: q.bounds.midY), to: w)
+                    let hit = w.hitTest(p, with: nil)
+                    DebugLog.log("quicktap at \(p) hits \(String(describing: hit.map { type(of: $0) }))")
+                } else { DebugLog.log("quicktap: no quick button") }
+            }
         case "toast": for i in 0..<12 { DispatchQueue.main.asyncAfter(deadline: .now() + 1 + Double(i) * 1.5) { G.toast("Welcome back!", "You were away for 46 minutes, and made 90 cookies.", [10, 0]) } }
         default: break
         }
