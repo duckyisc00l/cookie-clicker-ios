@@ -50,7 +50,7 @@ enum DebugShots {
                     let hit = w.hitTest(p, with: nil)
                     DebugLog.log("quicktap at \(p) hits \(String(describing: hit.map { type(of: $0) }))")
                     let before = G.powerClicksOn
-                    (hit as? TapView)?.onTap?(hit!)
+                    if let tv = hit as? TapView { tv.onTap?(tv) }
                     DebugLog.log("quicktap powerClicksOn \(before) -> \(G.powerClicksOn)")
                 } else { DebugLog.log("quicktap: no quick button") }
             }
