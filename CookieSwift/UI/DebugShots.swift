@@ -39,6 +39,9 @@ enum DebugShots {
             }
         case "quicktap":
             // is a finger on the power clicks button sent to that button?
+            if let u = G.upgradesBN["Power clicks"] { u.unlocked = 1; u.owned = 1 }
+            G.powerClicks = 5
+            G.setScreen("store", force: true); G.setScreen("cookie", force: true)
             DispatchQueue.main.asyncAfter(deadline: .now() + 2) {
                 guard let w = UIApplication.shared.connectedScenes.compactMap({ ($0 as? UIWindowScene)?.windows.first }).first else { return }
                 func find(_ v: UIView) -> UIView? { if v is QuickButton { return v }; for c in v.subviews { if let f = find(c) { return f } }; return nil }
@@ -46,6 +49,9 @@ enum DebugShots {
                     let p = q.convert(CGPoint(x: q.bounds.midX, y: q.bounds.midY), to: w)
                     let hit = w.hitTest(p, with: nil)
                     DebugLog.log("quicktap at \(p) hits \(String(describing: hit.map { type(of: $0) }))")
+                    let before = G.powerClicksOn
+                    (hit as? TapView)?.onTap?(hit!)
+                    DebugLog.log("quicktap powerClicksOn \(before) -> \(G.powerClicksOn)")
                 } else { DebugLog.log("quicktap: no quick button") }
             }
         case "toast": for i in 0..<12 { DispatchQueue.main.asyncAfter(deadline: .now() + 1 + Double(i) * 1.5) { G.toast("Welcome back!", "You were away for 46 minutes, and made 90 cookies.", [10, 0]) } }

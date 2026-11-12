@@ -1,1 +1,1 @@
-popup-quicktap popup-lump
+popup-quicktap
