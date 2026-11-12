@@ -1,0 +1,2 @@
+[popup-quicktap] quicktap at (345.103125, 720.978125) hits Optional(CookieClicker.QuickButton)
+[popup-quicktap] quicktap powerClicksOn false -> true

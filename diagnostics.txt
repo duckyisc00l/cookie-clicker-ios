@@ -1,0 +1,5 @@
+/Users/runner/work/cookie-clicker-ios/cookie-clicker-ios/CookieSwift/Core/Content.swift:26:105: warning: '77777777777777777777777777777' is not exactly representable as 'Double'; it becomes '77777777777777780888109580288'
+/Users/runner/work/cookie-clicker-ios/cookie-clicker-ios/CookieSwift/Minigames/Grimoire.swift:304:59: warning: left side of nil coalescing operator '??' has non-optional type 'Double', so the right side is never used
+/Users/runner/work/cookie-clicker-ios/cookie-clicker-ios/CookieSwift/Minigames/Grimoire.swift:305:68: warning: left side of nil coalescing operator '??' has non-optional type 'Double', so the right side is never used
+/Users/runner/work/cookie-clicker-ios/cookie-clicker-ios/CookieSwift/Minigames/Grimoire.swift:306:73: warning: left side of nil coalescing operator '??' has non-optional type 'Double', so the right side is never used
+2026-11-12 05:08:35.058 appintentsmetadataprocessor[2585:10884] warning: Metadata extraction skipped. No AppIntents.framework dependency found.
